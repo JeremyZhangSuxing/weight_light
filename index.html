@@ -4,7 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>每日减肥打卡</title>
+  <!-- 让 iPhone 当成 App 打开 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <!-- App 名字 -->
+  <meta name="apple-mobile-web-app-title" content="每日减肥">
+
+  <!-- 图标 -->
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <!-- 启动画面背景颜色 -->
+  <meta name="theme-color" content="#ffffff">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -114,8 +125,8 @@
   <div class="section">
     <div class="title">选择用户</div>
     <select id="userSelect" onchange="render()">
-      <option value="user1">用户 1</option>
-      <option value="user2">用户 2</option>
+      <option value="user1">徐庆</option>
+      <option value="user2">疏义康</option>
       <option value="user3">用户 3</option>
       <option value="user4">用户 4</option>
       <option value="user5">用户 5</option>
