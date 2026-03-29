@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日减脂菜单</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #f1f8e9);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .header .date {
+            font-size: 14px;
+            color: #888;
+        }
+        .header .combo-tag {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 14px;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            color: #fff;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .total-card {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(67,233,123,0.3);
+        }
+        .total-card .label { font-size: 14px; opacity: 0.9; }
+        .total-card .cal { font-size: 42px; font-weight: bold; }
+        .total-card .unit { font-size: 16px; opacity: 0.8; }
+        .meal-section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .meal-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .meal-title .icon { font-size: 22px; }
+        .meal-title .time { font-size: 12px; color: #aaa; font-weight: normal; margin-left: auto; }
+        .dish-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #f5f5f5;
+        }
+        .dish-item:last-child { border-bottom: none; }
+        .dish-name { font-size: 15px; }
+        .dish-portion { font-size: 12px; color: #999; margin-top: 2px; }
+        .dish-cal {
+            font-size: 14px;
+            font-weight: bold;
+            color: #43e97b;
+            white-space: nowrap;
+        }
+        .meal-subtotal {
+            text-align: right;
+            font-size: 13px;
+            color: #888;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .meal-subtotal span { color: #333; font-weight: bold; }
+        .tip-card {
+            background: #fff8e1;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+            font-size: 13px;
+            color: #795548;
+            line-height: 1.6;
+        }
+        .tip-card .tip-title { font-weight: bold; margin-bottom: 4px; font-size: 14px; }
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-bottom: 30px;
+        }
+        .refresh-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            color: #43e97b;
+            border: 2px solid #43e97b;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🥗 每日减脂菜单</h1>
+        <div class="date" id="dateDisplay"></div>
+        <div class="combo-tag" id="comboTag"></div>
+    </div>
+
+    <div class="total-card">
+        <div class="label">今日总热量摄入目标</div>
+        <div class="cal" id="totalCal"></div>
+        <div class="unit">千卡 (kcal)</div>
+    </div>
+
+    <div id="menuContent"></div>
+
+    <div class="tip-card" id="tipCard"></div>
+
+    <button class="refresh-btn" onclick="showRandom()">🔄 换一套菜单看看</button>
+    <a class="back-btn" href="index.html">⬅ 返回打卡页面</a>
+</div>
+
+<script>
+    const menus = [
+        {
+            name: "元气轻食套餐",
+            tip: "💡 今日提示：多喝水有助于代谢，建议每天喝 2000ml 以上白开水，饭前一杯更佳。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "燕麦粥", portion: "200g", cal: 150 },
+                        { name: "水煮蛋", portion: "2个", cal: 140 },
+                        { name: "小黄瓜", portion: "1根", cal: 15 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "鸡胸肉沙拉", portion: "150g鸡胸+蔬菜", cal: 250 },
+                        { name: "糙米饭", portion: "半碗(80g)", cal: 110 },
+                        { name: "清炒西兰花", portion: "150g", cal: 45 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "清蒸鲈鱼", portion: "150g", cal: 160 },
+                        { name: "凉拌菠菜", portion: "100g", cal: 30 },
+                        { name: "紫米粥", portion: "小碗", cal: 90 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "苹果", portion: "1个中等", cal: 80 }
+                    ]}
+            ]
+        },
+        {
+            name: "高蛋白增肌餐",
+            tip: "💡 今日提示：蛋白质是肌肉修复的关键，减脂期每公斤体重建议摄入 1.5-2g 蛋白质。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "全麦吐司", portion: "2片", cal: 140 },
+                        { name: "脱脂牛奶", portion: "250ml", cal: 80 },
+                        { name: "蓝莓", portion: "50g", cal: 25 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "番茄炖牛腩(去油)", portion: "150g", cal: 220 },
+                        { name: "荞麦面", portion: "一碗(100g干)", cal: 130 },
+                        { name: "拍黄瓜", portion: "100g", cal: 20 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "白灼虾", portion: "200g(带壳)", cal: 140 },
+                        { name: "凉拌木耳", portion: "100g", cal: 35 },
+                        { name: "玉米", portion: "半根", cal: 55 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "无糖酸奶", portion: "150g", cal: 85 }
+                    ]}
+            ]
+        },
+        {
+            name: "地中海健康餐",
+            tip: "💡 今日提示：橄榄油是优质脂肪来源，但每天用量控制在 15-20ml 以内即可。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "紫薯", portion: "1个中等(150g)", cal: 130 },
+                        { name: "无糖豆浆", portion: "300ml", cal: 60 },
+                        { name: "圣女果", portion: "10颗", cal: 30 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "少油宫保鸡丁", portion: "150g", cal: 200 },
+                        { name: "杂粮饭", portion: "半碗(80g)", cal: 105 },
+                        { name: "蒜蓉油麦菜", portion: "150g", cal: 40 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "豆腐蔬菜汤", portion: "一大碗", cal: 110 },
+                        { name: "蒸蛋", portion: "2个蛋", cal: 130 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "香蕉", portion: "半根", cal: 45 }
+                    ]}
+            ]
+        },
+        {
+            name: "日式清淡套餐",
+            tip: "💡 今日提示：吃饭时细嚼慢咽，每口咀嚼 20 次以上，大脑更容易感受到饱腹感。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "红薯", portion: "1个小的(120g)", cal: 110 },
+                        { name: "水煮蛋", portion: "1个", cal: 70 },
+                        { name: "牛奶", portion: "250ml", cal: 130 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "三文鱼刺身", portion: "100g", cal: 160 },
+                        { name: "味噌汤", portion: "一碗", cal: 45 },
+                        { name: "糙米饭", portion: "半碗(80g)", cal: 110 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "秋葵炒蛋", portion: "2个蛋+秋葵", cal: 170 },
+                        { name: "凉拌海带丝", portion: "100g", cal: 25 },
+                        { name: "小米粥", portion: "小碗", cal: 70 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "猕猴桃", portion: "1个", cal: 55 }
+                    ]}
+            ]
+        },
+        {
+            name: "低碳水燃脂餐",
+            tip: "💡 今日提示：适当减少碳水不等于完全不吃，大脑需要碳水供能，杂粮是好选择。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "鸡蛋饼(少油)", portion: "2个蛋", cal: 160 },
+                        { name: "黑咖啡", portion: "一杯", cal: 5 },
+                        { name: "牛油果", portion: "1/4个", cal: 55 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "烤鸡腿(去皮)", portion: "1个大的", cal: 220 },
+                        { name: "生菜沙拉", portion: "一大盘", cal: 35 },
+                        { name: "南瓜", portion: "100g", cal: 45 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "金枪鱼罐头(水浸)", portion: "1罐", cal: 130 },
+                        { name: "炒芦笋", portion: "150g", cal: 40 },
+                        { name: "西红柿蛋汤", portion: "一碗", cal: 70 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "坚果", portion: "10g(约5颗)", cal: 60 },
+                        { name: "黄瓜", portion: "1根", cal: 20 }
+                    ]}
+            ]
+        },
+        {
+            name: "素食轻体餐",
+            tip: "💡 今日提示：素食减脂注意补充 B12 和铁，豆制品和深色蔬菜是好帮手。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "五谷杂粮粥", portion: "一碗", cal: 140 },
+                        { name: "水煮蛋", portion: "1个", cal: 70 },
+                        { name: "生菜+番茄", portion: "各50g", cal: 20 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "麻婆豆腐(少油)", portion: "200g", cal: 180 },
+                        { name: "糙米饭", portion: "半碗(80g)", cal: 110 },
+                        { name: "炒时蔬", portion: "150g", cal: 50 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "毛豆", portion: "100g(带壳)", cal: 65 },
+                        { name: "清炒冬瓜", portion: "200g", cal: 30 },
+                        { name: "南瓜小米粥", portion: "小碗", cal: 90 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "橙子", portion: "1个", cal: 60 }
+                    ]}
+            ]
+        },
+        {
+            name: "粗粮养胃套餐",
+            tip: "💡 今日提示：粗粮 GI 值低，饱腹感强，但肠胃不好的同学建议粗细搭配 1:1。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "玉米", portion: "1根", cal: 110 },
+                        { name: "鸡蛋白", portion: "3个", cal: 50 },
+                        { name: "脱脂酸奶", portion: "100g", cal: 50 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "黄焖鸡(去皮少油)", portion: "150g", cal: 200 },
+                        { name: "红豆薏米饭", portion: "半碗", cal: 120 },
+                        { name: "白灼菜心", portion: "150g", cal: 35 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "虾仁炒丝瓜", portion: "200g", cal: 110 },
+                        { name: "杂粮馒头", portion: "半个", cal: 75 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "梨", portion: "1个小的", cal: 55 },
+                        { name: "枸杞菊花茶", portion: "一杯", cal: 5 }
+                    ]}
+            ]
+        },
+        {
+            name: "海鲜优选套餐",
+            tip: "💡 今日提示：海鲜高蛋白低脂肪，是减脂利器！注意痛风患者要控制嘌呤摄入。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "全麦三明治", portion: "1份(鸡蛋+生菜)", cal: 200 },
+                        { name: "鲜榨橙汁", portion: "200ml(无糖)", cal: 45 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "清蒸鳕鱼", portion: "150g", cal: 130 },
+                        { name: "藜麦饭", portion: "半碗(80g)", cal: 105 },
+                        { name: "蒜蓉娃娃菜", portion: "200g", cal: 40 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "花蛤豆腐汤", portion: "一大碗", cal: 120 },
+                        { name: "凉拌西芹", portion: "100g", cal: 25 },
+                        { name: "红薯", portion: "小个(100g)", cal: 90 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "草莓", portion: "8颗", cal: 40 }
+                    ]}
+            ]
+        },
+        {
+            name: "暖胃汤品套餐",
+            tip: "💡 今日提示：饭前喝汤有助于控制食量，但注意不喝浓汤、油汤，清汤最佳。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "山药小米粥", portion: "一碗", cal: 120 },
+                        { name: "茶叶蛋", portion: "2个", cal: 140 },
+                        { name: "凉拌三丝", portion: "小份", cal: 35 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "冬瓜排骨汤(去油)", portion: "一碗", cal: 130 },
+                        { name: "瘦肉片", portion: "100g", cal: 140 },
+                        { name: "杂粮饭", portion: "半碗", cal: 105 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "番茄鸡蛋面", portion: "清汤面一小碗", cal: 200 },
+                        { name: "烫青菜", portion: "150g", cal: 25 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "桃子", portion: "1个小的", cal: 50 }
+                    ]}
+            ]
+        },
+        {
+            name: "活力混搭套餐",
+            tip: "💡 今日提示：减脂不是挨饿！每天至少 1200kcal，低于这个值身体会降低代谢保护自己。",
+            meals: [
+                { title: "早餐", icon: "🌅", time: "7:00-8:00", dishes: [
+                        { name: "杂粮煎饼", portion: "1个(少油)", cal: 170 },
+                        { name: "豆浆", portion: "300ml(无糖)", cal: 55 },
+                        { name: "水煮蛋", portion: "1个", cal: 70 }
+                    ]},
+                { title: "午餐", icon: "☀️", time: "12:00-13:00", dishes: [
+                        { name: "西芹炒牛肉", portion: "150g", cal: 190 },
+                        { name: "糙米饭", portion: "半碗(80g)", cal: 110 },
+                        { name: "紫菜蛋花汤", portion: "一碗", cal: 35 }
+                    ]},
+                { title: "晚餐", icon: "🌙", time: "18:00-19:00", dishes: [
+                        { name: "香煎三文鱼", portion: "100g(少油)", cal: 180 },
+                        { name: "芝麻菠菜", portion: "100g", cal: 40 }
+                    ]},
+                { title: "加餐", icon: "🍎", time: "15:00 / 20:00", dishes: [
+                        { name: "西柚", portion: "半个", cal: 40 },
+                        { name: "绿茶", portion: "一杯", cal: 2 }
+                    ]}
+            ]
+        }
+    ];
+
+    function getTodayIndex() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now - start;
+        const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+        return dayOfYear % menus.length;
+    }
+
+    let currentIndex = getTodayIndex();
+
+    function renderMenu(index) {
+        const menu = menus[index];
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const weekDays = ['日','一','二','三','四','五','六'];
+        const weekDay = weekDays[now.getDay()];
+
+        document.getElementById('dateDisplay').textContent = `${year}年${month}月${day}日 星期${weekDay}`;
+        document.getElementById('comboTag').textContent = `套餐 ${index + 1}/10：${menu.name}`;
+
+        let totalCal = 0;
+        let html = '';
+
+        menu.meals.forEach(meal => {
+            let mealCal = 0;
+            let dishesHtml = '';
+            meal.dishes.forEach(d => {
+                mealCal += d.cal;
+                dishesHtml += `
+        <div class="dish-item">
+          <div>
+            <div class="dish-name">${d.name}</div>
+            <div class="dish-portion">${d.portion}</div>
+          </div>
+          <div class="dish-cal">${d.cal} kcal</div>
+        </div>`;
+            });
+            totalCal += mealCal;
+
+            html += `
+      <div class="meal-section">
+        <div class="meal-title">
+          <span class="icon">${meal.icon}</span>
+          ${meal.title}
+          <span class="time">${meal.time}</span>
+        </div>
+        ${dishesHtml}
+        <div class="meal-subtotal">小计：<span>${mealCal} kcal</span></div>
+      </div>`;
+        });
+
+        document.getElementById('totalCal').textContent = totalCal;
+        document.getElementById('menuContent').innerHTML = html;
+        document.getElementById('tipCard').innerHTML = `<div class="tip-title">🔔 减脂小贴士</div>${menu.tip}`;
+    }
+
+    function showRandom() {
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * menus.length);
+        } while (newIndex === currentIndex && menus.length > 1);
+        currentIndex = newIndex;
+        renderMenu(currentIndex);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderMenu(currentIndex);
+</script>
+</body>
+</html>
