@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日减肥打卡</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #3a7d44;
+            --green-light: #e8f5e9;
+            --green-mid: #a5d6a7;
+            --green-dark: #1b5e20;
+            --amber: #f59e0b;
+            --amber-light: #fef3c7;
+            --blue: #2563eb;
+            --blue-light: #eff6ff;
+            --text: #1a1a1a;
+            --text-2: #555;
+            --text-3: #999;
+            --bg: #fafaf8;
+            --card: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 90px;
+        }
+
+        /* --- header --- */
+        .header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 20px 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .header-top { display: flex; align-items: center; justify-content: space-between; }
+        .app-title { font-family: 'Noto Serif SC', serif; font-size: 20px; font-weight: 600; color: var(--green-dark); }
+        .header-date { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+        /* --- slogan banner --- */
+        .slogan-banner {
+            margin: 16px 16px 0;
+            background: var(--green);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            position: relative;
+            overflow: hidden;
+            min-height: 80px;
+        }
+        .slogan-banner::before {
+            content: '';
+            position: absolute;
+            right: -20px; top: -20px;
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+        }
+        .slogan-banner::after {
+            content: '';
+            position: absolute;
+            right: 30px; bottom: -30px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .slogan-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 6px; letter-spacing: 0.05em; }
+        .slogan-content { font-family: 'Noto Serif SC', serif; font-size: 17px; color: #fff; line-height: 1.55; font-weight: 600; }
+        .slogan-tag { display: inline-block; margin-top: 8px; font-size: 11px; background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.9); padding: 2px 10px; border-radius: 20px; }
+        .slogan-refresh {
+            position: absolute; right: 14px; top: 14px;
+            background: rgba(255,255,255,0.18); border: none; border-radius: 8px;
+            color: rgba(255,255,255,0.85); font-size: 18px; cursor: pointer;
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+            z-index: 1;
+        }
+        .slogan-refresh:active { background: rgba(255,255,255,0.3); }
+        .slogan-loading { color: rgba(255,255,255,0.5); font-size: 14px; }
+
+        /* --- tabs --- */
+        .tabs {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+        .tab-btn {
+            flex: 1; padding: 10px 0 8px; border: none; background: transparent;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            cursor: pointer; transition: color 0.15s;
+            color: var(--text-3); font-size: 11px;
+        }
+        .tab-btn.active { color: var(--green); }
+        .tab-icon { font-size: 22px; line-height: 1; }
+
+        /* --- page sections --- */
+        .page { display: none; padding: 16px; }
+        .page.active { display: block; }
+
+        /* --- cards --- */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .card-title {
+            font-size: 12px; color: var(--text-3);
+            letter-spacing: 0.05em; margin-bottom: 12px;
+        }
+
+        /* --- stat row --- */
+        .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .stat-box {
+            flex: 1; background: var(--bg); border-radius: var(--radius-sm);
+            padding: 12px 10px; text-align: center; border: 1px solid var(--border);
+        }
+        .stat-num { font-size: 24px; font-weight: 500; color: var(--text); line-height: 1; }
+        .stat-unit { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+        .stat-lbl { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+
+        /* --- checkin button --- */
+        .checkin-btn {
+            width: 100%; padding: 16px; border-radius: var(--radius);
+            font-size: 16px; font-weight: 500; border: none; cursor: pointer;
+            transition: all 0.2s; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .checkin-btn.todo { background: var(--green); color: #fff; }
+        .checkin-btn.done { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--green-mid); }
+        .checkin-btn:active { transform: scale(0.97); }
+
+        /* --- task list --- */
+        .task-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer;
+        }
+        .task-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .task-circle {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 1.5px solid #ccc; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .task-circle.on { background: var(--green); border-color: var(--green); }
+        .task-circle.on::after { content: ''; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block; }
+        .task-info .task-name { font-size: 14px; color: var(--text); }
+        .task-info .task-sub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+
+        /* --- weight input --- */
+        .input-row { display: flex; gap: 8px; }
+        .weight-inp {
+            flex: 1; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: var(--radius-sm); font-size: 15px; color: var(--text);
+            background: var(--bg); outline: none;
+        }
+        .weight-inp:focus { border-color: var(--green); }
+        .save-btn {
+            padding: 10px 18px; background: var(--green-light); color: var(--green-dark);
+            border: 1px solid var(--green-mid); border-radius: var(--radius-sm);
+            font-size: 14px; cursor: pointer; white-space: nowrap;
+        }
+        .save-btn:active { transform: scale(0.97); }
+        .hint-text { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+
+        /* --- recipe --- */
+        .meal-label { font-size: 11px; color: var(--text-3); letter-spacing: 0.06em; margin-bottom: 8px; }
+        .recipe-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+        .recipe-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+        .recipe-name { font-size: 15px; font-weight: 500; color: var(--text); }
+        .recipe-kcal { font-size: 12px; color: var(--text-3); background: var(--bg); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--border); }
+        .recipe-desc { font-size: 13px; color: var(--text-2); line-height: 1.55; margin-bottom: 8px; }
+        .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tag { font-size: 11px; padding: 2px 9px; border-radius: 20px; }
+        .tag-g { background: var(--green-light); color: var(--green-dark); }
+        .tag-b { background: var(--blue-light); color: var(--blue); }
+        .tag-a { background: var(--amber-light); color: #92400e; }
+        .fasting-box { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; border: 1px solid var(--border); margin-top: 4px; }
+        .fasting-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+        .fasting-row { font-size: 12px; color: var(--text-2); line-height: 1.7; }
+        .progress-wrap { margin: 6px 0; }
+        .progress-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); margin-bottom: 4px; }
+        .progress-bar { height: 6px; background: var(--bg); border-radius: 3px; border: 1px solid var(--border); }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+
+        /* --- calendar --- */
+        .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
+        .cal-wd { font-size: 11px; color: var(--text-3); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+        .cal-cell { aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-3); }
+        .cal-cell.checked { background: var(--green); color: #fff; font-weight: 500; }
+        .cal-cell.today { border: 1.5px solid var(--blue); color: var(--blue); font-weight: 500; }
+
+        /* --- weight chart --- */
+        .wchart { display: flex; align-items: flex-end; gap: 5px; height: 80px; margin: 8px 0; }
+        .wbar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .wbar { width: 100%; border-radius: 4px 4px 0 0; background: #bfdbfe; min-height: 4px; }
+        .wbar-lbl { font-size: 10px; color: var(--text-3); }
+
+        /* --- toast --- */
+        .toast {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: rgba(30,30,30,0.85); color: #fff;
+            padding: 10px 20px; border-radius: 30px; font-size: 14px;
+            opacity: 0; transition: opacity 0.25s; pointer-events: none;
+            white-space: nowrap; z-index: 200; backdrop-filter: blur(8px);
+        }
+        .toast.show { opacity: 1; }
+
+        /* --- history slogans --- */
+        .history-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .history-item:last-child { border-bottom: none; }
+        .history-date { font-size: 11px; color: var(--text-3); margin-bottom: 3px; }
+        .history-text { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+
+        /* animations */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .page.active .card, .page.active .recipe-card { animation: fadeUp 0.25s ease both; }
+        .page.active .card:nth-child(2) { animation-delay: 0.04s; }
+        .page.active .card:nth-child(3) { animation-delay: 0.08s; }
+        .page.active .card:nth-child(4) { animation-delay: 0.12s; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinning { animation: spin 0.8s linear infinite; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<!-- header -->
+<div class="header">
+    <div class="header-top">
+        <div>
+            <div class="app-title">🌱 每日减肥打卡</div>
+            <div class="header-date" id="header-date"></div>
+        </div>
+    </div>
+</div>
+
+<!-- AI slogan banner -->
+<div class="slogan-banner">
+    <button class="slogan-refresh" id="slogan-refresh-btn" onclick="generateSlogan(true)" title="换一句">↻</button>
+    <div class="slogan-label">今日口号 · AI 生成</div>
+    <div class="slogan-content" id="slogan-content"><span class="slogan-loading">正在生成今日口号...</span></div>
+    <div id="slogan-tag-wrap"></div>
+</div>
+
+<!-- pages -->
+<!-- 打卡 -->
+<div class="page active" id="page-checkin">
+    <div class="stat-row">
+        <div class="stat-box">
+            <div class="stat-lbl">连续打卡</div>
+            <div class="stat-num" id="streak">0</div>
+            <div class="stat-unit">天</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-lbl">本月完成</div>
+            <div class="stat-num" id="monthcount">0</div>
+            <div class="stat-unit">天</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-lbl">目标体重</div>
+            <div class="stat-num" id="goal-display">--</div>
+            <div class="stat-unit">kg</div>
+        </div>
+    </div>
+
+    <button class="checkin-btn todo" id="checkin-btn" onclick="doCheckin()">
+        <span id="checkin-icon">✓</span>
+        <span id="checkin-text">今日打卡</span>
+    </button>
+
+    <div class="card">
+        <div class="card-title">今日任务</div>
+        <div class="task-item" onclick="toggleTask(0)">
+            <div class="task-circle" id="t0"></div>
+            <div class="task-info"><div class="task-name">喝够 8 杯水</div><div class="task-sub">保持水分，促进代谢</div></div>
+        </div>
+        <div class="task-item" onclick="toggleTask(1)">
+            <div class="task-circle" id="t1"></div>
+            <div class="task-info"><div class="task-name">运动 30 分钟</div><div class="task-sub">有氧 / 散步 / 瑜伽均可</div></div>
+        </div>
+        <div class="task-item" onclick="toggleTask(2)">
+            <div class="task-circle" id="t2"></div>
+            <div class="task-info"><div class="task-name">遵守断食窗口</div><div class="task-sub">16:8 进食时间 12:00 ~ 20:00</div></div>
+        </div>
+        <div class="task-item" onclick="toggleTask(3)">
+            <div class="task-circle" id="t3"></div>
+            <div class="task-info"><div class="task-name">睡前不吃东西</div><div class="task-sub">20:00 后停止进食</div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">记录体重</div>
+        <div class="input-row">
+            <input class="weight-inp" type="number" id="weight-inp" placeholder="今日体重 (kg)" step="0.1" min="30" max="200">
+            <button class="save-btn" onclick="saveWeight()">记录</button>
+        </div>
+        <div class="hint-text" id="weight-hint">暂无记录</div>
+    </div>
+</div>
+
+<!-- 食谱 -->
+<div class="page" id="page-recipe">
+    <div class="meal-label">☀️ 早餐 · 12:00 开餐</div>
+    <div class="recipe-card">
+        <div class="recipe-top">
+            <div class="recipe-name">燕麦希腊酸奶碗</div>
+            <div class="recipe-kcal">约 320 卡</div>
+        </div>
+        <div class="recipe-desc">即食燕麦 + 无糖希腊酸奶 + 少量蓝莓蜂蜜。高蛋白低糖，开餐第一餐饱腹感强，5 分钟搞定。</div>
+        <div class="tags">
+            <span class="tag tag-g">高蛋白</span>
+            <span class="tag tag-b">低GI</span>
+            <span class="tag tag-a">5分钟</span>
+        </div>
+    </div>
+
+    <div class="meal-label">🌤 午餐 · 15:00</div>
+    <div class="recipe-card">
+        <div class="recipe-top">
+            <div class="recipe-name">鸡胸肉藜麦沙拉</div>
+            <div class="recipe-kcal">约 450 卡</div>
+        </div>
+        <div class="recipe-desc">水煮鸡胸切丝 + 煮熟藜麦 + 黄瓜番茄 + 橄榄油柠檬汁拌匀。营养均衡，控卡不控量感。</div>
+        <div class="tags">
+            <span class="tag tag-g">减脂</span>
+            <span class="tag tag-b">高纤维</span>
+            <span class="tag tag-g">优质碳水</span>
+        </div>
+    </div>
+
+    <div class="meal-label">🌙 晚餐 · 18:00（20:00 前结束）</div>
+    <div class="recipe-card">
+        <div class="recipe-top">
+            <div class="recipe-name">清蒸三文鱼 + 蒸蔬菜</div>
+            <div class="recipe-kcal">约 380 卡</div>
+        </div>
+        <div class="recipe-desc">三文鱼 200g 清蒸，搭配西蓝花、胡萝卜蒸熟。富含 Omega-3，帮助抗炎促代谢，清淡不腻。</div>
+        <div class="tags">
+            <span class="tag tag-b">Omega-3</span>
+            <span class="tag tag-g">低卡</span>
+            <span class="tag tag-a">15分钟</span>
+        </div>
+    </div>
+
+    <div class="recipe-card">
+        <div class="progress-wrap">
+            <div class="progress-lbl"><span>热量进度</span><span>1150 / 1400 卡</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:82%;background:var(--green);"></div></div>
+        </div>
+        <div class="progress-wrap">
+            <div class="progress-lbl"><span>蛋白质</span><span>85 / 100g</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--blue);"></div></div>
+        </div>
+    </div>
+
+    <div class="fasting-box">
+        <div class="fasting-title">⏱ 16:8 轻断食时间窗口</div>
+        <div class="fasting-row">
+            进食：12:00 — 20:00（8 小时）<br>
+            断食：20:00 — 12:00（16 小时）<br>
+            <span style="color:var(--text-3);font-size:11px;">断食期间可饮水、黑咖啡、无糖茶</span>
+        </div>
+    </div>
+</div>
+
+<!-- 记录 -->
+<div class="page" id="page-stats">
+    <div class="card">
+        <div class="card-title">本月打卡日历</div>
+        <div class="cal-header" id="cal-wd"></div>
+        <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">体重趋势（近 7 天）</div>
+        <div class="wchart" id="wchart"><div style="font-size:12px;color:var(--text-3);align-self:center;width:100%;text-align:center;">暂无体重数据</div></div>
+        <div class="hint-text" id="wchart-range"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">设置目标体重</div>
+        <div class="input-row">
+            <input class="weight-inp" type="number" id="goal-inp" placeholder="目标体重 (kg)" step="0.1" min="30" max="200">
+            <button class="save-btn" onclick="saveGoal()">保存</button>
+        </div>
+    </div>
+
+    <div class="card" id="slogan-history-card" style="display:none;">
+        <div class="card-title">近期口号回顾</div>
+        <div id="slogan-history"></div>
+    </div>
+</div>
+
+<!-- tabs -->
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('checkin',this)">
+        <span class="tab-icon">✅</span>打卡
+    </button>
+    <button class="tab-btn" onclick="switchTab('recipe',this)">
+        <span class="tab-icon">🥗</span>食谱
+    </button>
+    <button class="tab-btn" onclick="switchTab('stats',this)">
+        <span class="tab-icon">📊</span>记录
+    </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const K = { checkins:'dcd_checkins', weights:'dcd_weights', tasks:'dcd_tasks', goal:'dcd_goal', slogans:'dcd_slogans' };
+
+    function todayStr() { return new Date().toISOString().slice(0,10); }
+    function load(k) { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } }
+    function save(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function switchTab(name, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('page-' + name).classList.add('active');
+        if (btn) btn.classList.add('active');
+        if (name === 'stats') { renderCalendar(); renderWeightChart(); renderSloganHistory(); }
+    }
+
+    /* --- checkin --- */
+    function doCheckin() {
+        const today = todayStr(), checkins = load(K.checkins);
+        if (checkins[today]) { toast('今天已经打卡啦！继续保持 💪'); return; }
+        checkins[today] = true;
+        save(K.checkins, checkins);
+        refreshCheckinUI();
+        toast('打卡成功！今天也是奋斗的一天 🌱');
+    }
+
+    function refreshCheckinUI() {
+        const today = todayStr(), checkins = load(K.checkins);
+        const done = !!checkins[today];
+        const btn = document.getElementById('checkin-btn');
+        btn.className = 'checkin-btn ' + (done ? 'done' : 'todo');
+        document.getElementById('checkin-text').textContent = done ? '今日已打卡' : '今日打卡';
+        document.getElementById('checkin-icon').textContent = done ? '✓' : '✓';
+
+        let streak = 0, d = new Date();
+        while (checkins[d.toISOString().slice(0,10)]) { streak++; d.setDate(d.getDate()-1); }
+        document.getElementById('streak').textContent = streak;
+
+        const now = new Date();
+        const prefix = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+        const month = Object.keys(checkins).filter(k => k.startsWith(prefix)).length;
+        document.getElementById('monthcount').textContent = month;
+    }
+
+    /* --- tasks --- */
+    function toggleTask(i) {
+        const today = todayStr(), tasks = load(K.tasks);
+        if (!tasks[today]) tasks[today] = {};
+        tasks[today][i] = !tasks[today][i];
+        save(K.tasks, tasks);
+        document.getElementById('t'+i).classList.toggle('on', !!tasks[today][i]);
+    }
+
+    function loadTasks() {
+        const t = (load(K.tasks)[todayStr()] || {});
+        for (let i=0;i<4;i++) document.getElementById('t'+i).classList.toggle('on', !!t[i]);
+    }
+
+    /* --- weight --- */
+    function saveWeight() {
+        const v = parseFloat(document.getElementById('weight-inp').value);
+        if (!v || v < 30 || v > 200) { toast('请输入有效体重'); return; }
+        const w = load(K.weights);
+        w[todayStr()] = v;
+        save(K.weights, w);
+        document.getElementById('weight-inp').value = '';
+        updateWeightHint();
+        toast('体重已记录：' + v.toFixed(1) + ' kg');
+    }
+
+    function updateWeightHint() {
+        const w = load(K.weights), today = todayStr();
+        const hint = document.getElementById('weight-hint');
+        if (w[today]) { hint.textContent = '今日体重：' + w[today].toFixed(1) + ' kg'; return; }
+        const keys = Object.keys(w).sort().reverse();
+        hint.textContent = keys.length ? '最近记录：' + w[keys[0]].toFixed(1) + ' kg（' + keys[0] + '）' : '暂无记录';
+    }
+
+    /* --- goal --- */
+    function saveGoal() {
+        const v = parseFloat(document.getElementById('goal-inp').value);
+        if (!v || v < 30 || v > 200) { toast('请输入有效目标体重'); return; }
+        save(K.goal, v);
+        document.getElementById('goal-inp').value = '';
+        loadGoal();
+        toast('目标体重已设置：' + v.toFixed(1) + ' kg ');
+    }
+
+    function loadGoal() {
+        const g = load(K.goal);
+        if (typeof g === 'number') document.getElementById('goal-display').textContent = g.toFixed(1);
+    }
+
+    /* --- calendar --- */
+    function renderCalendar() {
+        const now = new Date(), year = now.getFullYear(), month = now.getMonth();
+        const firstDay = new Date(year,month,1).getDay();
+        const days = new Date(year,month+1,0).getDate();
+        const checkins = load(K.checkins), today = now.getDate();
+
+        const wd = document.getElementById('cal-wd');
+        wd.innerHTML = ['日','一','二','三','四','五','六'].map(d=>`<div class="cal-wd">${d}</div>`).join('');
+
+        const grid = document.getElementById('cal-grid');
+        let html = '<div></div>'.repeat(firstDay);
+        for (let d=1;d<=days;d++) {
+            const ds = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+            const cls = checkins[ds] ? 'checked' : (d===today ? 'today' : '');
+            html += `<div class="cal-cell ${cls}">${d}</div>`;
+        }
+        grid.innerHTML = html;
+    }
+
+    /* --- weight chart --- */
+    function renderWeightChart() {
+        const w = load(K.weights), keys = Object.keys(w).sort().slice(-7);
+        const chart = document.getElementById('wchart');
+        if (!keys.length) return;
+        const vals = keys.map(k=>w[k]);
+        const mn = Math.min(...vals), mx = Math.max(...vals), range = mx-mn || 1;
+        chart.innerHTML = vals.map((v,i) => {
+            const h = Math.round(16 + ((v-mn)/range)*56);
+            const dateLabel = keys[i].slice(8);
+            return `<div class="wbar-wrap"><div class="wbar" style="height:${h}px"></div><div class="wbar-lbl">${dateLabel}日</div></div>`;
+        }).join('');
+        document.getElementById('wchart-range').textContent = keys[0].slice(5) + ' ~ ' + keys[keys.length-1].slice(5);
+    }
+
+    /* --- slogan history --- */
+    function renderSloganHistory() {
+        const data = load(K.slogans);
+        const keys = Object.keys(data).sort().reverse().slice(1,6);
+        const card = document.getElementById('slogan-history-card');
+        const list = document.getElementById('slogan-history');
+        if (!keys.length) { card.style.display='none'; return; }
+        card.style.display='block';
+        list.innerHTML = keys.map(k=>`
+    <div class="history-item">
+      <div class="history-date">${formatDate(k)}</div>
+      <div class="history-text">${data[k].text}</div>
+    </div>`).join('');
+    }
+
+    /* --- AI slogan --- */
+    function formatDate(str) {
+        return new Date(str).toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
+    }
+
+    async function generateSlogan(force) {
+        const today = todayStr(), data = load(K.slogans);
+        if (!force && data[today]) { showSlogan(data[today].text, data[today].tag); return; }
+
+        const el = document.getElementById('slogan-content');
+        const tw = document.getElementById('slogan-tag-wrap');
+        const btn = document.getElementById('slogan-refresh-btn');
+        el.innerHTML = '<span class="slogan-loading">生成中...</span>';
+        tw.innerHTML = '';
+        btn.innerHTML = '<span class="spinning">↻</span>';
+
+        const used = Object.values(data).map(v=>v.text).slice(-30).join('\n');
+        const dateLabel = formatDate(today);
+
+        try {
+            const resp = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 200,
+                    messages: [{
+                        role: 'user',
+                        content: `今天是${dateLabel}，为一个坚持减肥打卡的人生成一句【今日减肥口号】。
+
+要求：
+1. 风趣幽默，有网络梗、谐音、或反转感，让人看了忍不住笑又有动力
+2. 一句话，20字以内
+3. 和下面已用过的口号完全不同，不能重复创意：
+${used||'（暂无）'}
+
+同时给出一个2-4字的搞笑标签（如"嘴替语录""哲学减肥""吃货觉悟"等）。
+
+只返回JSON，不要任何其他文字：
+{"slogan":"口号内容","tag":"搞笑标签"}`
+                    }]
+                })
+            });
+            const result = await resp.json();
+            const raw = result.content?.map(b=>b.text||'').join('').trim();
+            const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+            const text = parsed.slogan || '脂肪不会自己走，但你可以追着它跑';
+            const tag = parsed.tag || '减肥哲学';
+            data[today] = { text, tag, ts: Date.now() };
+            save(K.slogans, data);
+            showSlogan(text, tag);
+        } catch(e) {
+            const fallbacks = [
+                { text:'减肥就像挤牙膏，使劲才有效果', tag:'生活哲理' },
+                { text:'今天少吃一口，明天多穿一套', tag:'穿搭动力' },
+                { text:'脂肪是你的存款，但没人想要这种富翁', tag:'反向励志' },
+            ];
+            const fb = fallbacks[Math.floor(Math.random()*fallbacks.length)];
+            showSlogan(fb.text, fb.tag);
+        }
+        btn.innerHTML = '↻';
+    }
+
+    function showSlogan(text, tag) {
+        document.getElementById('slogan-content').textContent = text;
+        document.getElementById('slogan-tag-wrap').innerHTML = tag ? `<span class="slogan-tag">${tag}</span>` : '';
+    }
+
+    /* --- init --- */
+    function init() {
+        const now = new Date();
+        document.getElementById('header-date').textContent = now.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+        refreshCheckinUI();
+        loadTasks();
+        updateWeightHint();
+        loadGoal();
+        generateSlogan(false);
+    }
+
+    init();
+</script>
+</body>
+</html>
