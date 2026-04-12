@@ -461,7 +461,101 @@
 
   function todayStr() { return new Date().toISOString().slice(0,10); }
   function load(k) { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } }
-  function save(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  function save(k,v) { localStorage.setItem(k, JSON.stringify(v)); }
+
+  /* ===================== 口号库（50+） ===================== */
+  const LOCAL_SLOGANS = [
+    '再吃一口是放纵，不吃这一口是人生转折',
+    '今天不减肥，明天徒伤悲',
+    '你不是饿，你只是想找点乐子',
+    '脂肪：我不走，你也别想跑',
+    '再忍一口，明天瘦一斤（心理安慰版）',
+    '管住嘴的人，已经赢了一半人生',
+    '吃是本能，瘦是本事',
+    '今天吃少一点，明天镜子顺眼一点',
+    '你和瘦子之间，只差一个“忍”字',
+    '嘴巴爽5秒，脂肪跟你5个月',
+    '今天不自律，明天徒伤悲',
+    '减肥不是不吃，是少吃',
+    '你可以不瘦，但不能一直胖',
+    '吃多不幸福，瘦下来才快乐',
+    '你吃的不是饭，是未来的负担',
+    '体重不会骗人，嘴巴会',
+    '今天忍住，明天赢',
+    '瘦下来你会感谢今天的自己',
+    '嘴巴一时爽，体重火葬场',
+    '减肥就是和自己较劲',
+    '你不是控制不了，是不想控制',
+    '少吃一口，离目标更近一步',
+    '今天少一口，明天多一分自信',
+    '别问能不能瘦，问你忍不忍',
+    '你吃下去的，每一口都会回来',
+    '今天忍住，未来轻松',
+    '减肥没有捷径，只有克制',
+    '不是你胖，是你吃太认真',
+    '嘴巴赢了，身材输了',
+    '你可以懒，但不能胖',
+    '今天不努力，脂肪更努力',
+    '减肥就是延迟满足',
+    '你可以吃，但要值得',
+    '你控制的不是食物，是人生',
+    '吃一口不胖，但天天吃会',
+    '瘦下来世界都不一样',
+    '今天吃少一点，明天开心一点',
+    '控制饮食，就是控制未来',
+    '减肥不是苦，是成长',
+    '再坚持一下，真的会瘦',
+    '你离瘦，只差一点点忍耐',
+    '今天不吃宵夜，明天不后悔',
+    '每一口都是选择',
+    '你可以赢，只要你忍',
+    '吃的每一口，都有代价',
+    '控制住今晚，就是赢家',
+    '别输给深夜的自己',
+    '今天不放纵，明天不后悔',
+    '瘦下来，世界都温柔了',
+    '你不是做不到，是不够狠'
+  ];
+
+  /* ===================== 食谱库 ===================== */
+  const LOCAL_RECIPES = {
+    breakfast: [
+      {name:'鸡蛋牛油果吐司',kcal:'320卡',desc:'全麦+鸡蛋+牛油果，简单营养',tags:['高蛋白','健康脂肪']},
+      {name:'燕麦水果碗',kcal:'300卡',desc:'燕麦+香蕉+蓝莓',tags:['低GI','快手']},
+      {name:'酸奶坚果碗',kcal:'350卡',desc:'无糖酸奶+坚果',tags:['高蛋白']},
+      {name:'鸡蛋三明治',kcal:'330卡',desc:'全麦+鸡蛋+生菜',tags:['均衡']},
+      {name:'蛋白奶昔',kcal:'280卡',desc:'蛋白粉+牛奶',tags:['增肌']},
+      {name:'香蕉燕麦饼',kcal:'310卡',desc:'香蕉+燕麦煎',tags:['低脂']},
+      {name:'豆浆+鸡蛋',kcal:'290卡',desc:'传统早餐',tags:['清淡']},
+      {name:'玉米+鸡蛋',kcal:'260卡',desc:'简单顶饱',tags:['低卡']},
+      {name:'酸奶水果杯',kcal:'300卡',desc:'轻食组合',tags:['健康']},
+      {name:'全麦面包+鸡胸',kcal:'340卡',desc:'高蛋白组合',tags:['减脂']}
+    ],
+    lunch: [
+      {name:'鸡胸沙拉',kcal:'450卡',desc:'鸡胸+蔬菜',tags:['减脂']},
+      {name:'牛肉饭',kcal:'500卡',desc:'瘦牛肉+米饭',tags:['高蛋白']},
+      {name:'虾仁蔬菜',kcal:'420卡',desc:'低脂高蛋白',tags:['低卡']},
+      {name:'鸡胸意面',kcal:'480卡',desc:'全麦意面',tags:['低GI']},
+      {name:'三文鱼沙拉',kcal:'460卡',desc:'健康脂肪',tags:['Omega3']},
+      {name:'牛肉卷',kcal:'470卡',desc:'高蛋白组合',tags:['健身']},
+      {name:'鸡蛋蔬菜碗',kcal:'430卡',desc:'简单健康',tags:['清淡']},
+      {name:'杂粮饭+鸡胸',kcal:'450卡',desc:'优质碳水',tags:['均衡']},
+      {name:'藜麦沙拉',kcal:'440卡',desc:'低GI食物',tags:['健康']},
+      {name:'轻食拼盘',kcal:'420卡',desc:'多样组合',tags:['减脂']}
+    ],
+    dinner: [
+      {name:'西兰花鸡胸',kcal:'300卡',desc:'低脂高蛋白',tags:['减脂']},
+      {name:'番茄鸡蛋汤',kcal:'250卡',desc:'清淡好消化',tags:['清淡']},
+      {name:'虾仁蔬菜',kcal:'280卡',desc:'低卡晚餐',tags:['低卡']},
+      {name:'三文鱼',kcal:'350卡',desc:'优质脂肪',tags:['健康']},
+      {name:'鸡蛋沙拉',kcal:'260卡',desc:'简单轻食',tags:['轻食']},
+      {name:'蔬菜汤',kcal:'200卡',desc:'低热量',tags:['减脂']},
+      {name:'豆腐蔬菜',kcal:'270卡',desc:'植物蛋白',tags:['健康']},
+      {name:'鸡胸+青菜',kcal:'300卡',desc:'经典减脂餐',tags:['减脂']},
+      {name:'蒸鱼',kcal:'320卡',desc:'清淡营养',tags:['健康']},
+      {name:'凉拌鸡丝',kcal:'290卡',desc:'爽口低脂',tags:['低卡']}
+    ]
+  };
 
   function toast(msg) {
     const t = document.getElementById('toast');
@@ -609,130 +703,49 @@
     return new Date(str).toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
   }
 
-  async function generateSlogan(force) {
-    const today = todayStr(), data = load(K.slogans);
-    if (!force && data[today]) { showSlogan(data[today].text, data[today].tag); return; }
+  /* ===================== 口号随机 ===================== */
+  function generateSlogan(force) {
+    const today = todayStr();
+    const data = load(K.slogans);
 
-    const el = document.getElementById('slogan-content');
-    const tw = document.getElementById('slogan-tag-wrap');
-    const btn = document.getElementById('slogan-refresh-btn');
-    el.innerHTML = '<span class="slogan-loading">生成中...</span>';
-    tw.innerHTML = '';
-    btn.innerHTML = '<span class="spinning">↻</span>';
+    let random;
+    do {
+      random = LOCAL_SLOGANS[Math.floor(Math.random()*LOCAL_SLOGANS.length)];
+    } while (data[today]?.text === random);
 
-    const used = Object.values(data).map(v=>v.text).slice(-30).join('\n');
-    const dateLabel = formatDate(today);
+    data[today] = { text: random };
+    save(K.slogans, data);
 
-    try {
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 200,
-          messages: [{
-            role: 'user',
-            content: `今天是${dateLabel}，为一个坚持减肥打卡的人生成一句【今日减肥口号】。
-
-要求：
-1. 风趣幽默，有网络梗、谐音、或反转感，让人看了忍不住笑又有动力
-2. 一句话，20字以内
-3. 和下面已用过的口号完全不同，不能重复创意：
-${used||'（暂无）'}
-
-同时给出一个2-4字的搞笑标签（如"嘴替语录""哲学减肥""吃货觉悟"等）。
-
-只返回JSON，不要任何其他文字：
-{"slogan":"口号内容","tag":"搞笑标签"}`
-          }]
-        })
-      });
-      const result = await resp.json();
-      const raw = result.content?.map(b=>b.text||'').join('').trim();
-      const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
-      const text = parsed.slogan || '脂肪不会自己走，但你可以追着它跑';
-      const tag = parsed.tag || '减肥哲学';
-      data[today] = { text, tag, ts: Date.now() };
-      save(K.slogans, data);
-      showSlogan(text, tag);
-    } catch(e) {
-      const fallbacks = [
-        { text:'减肥就像挤牙膏，使劲才有效果', tag:'生活哲理' },
-        { text:'今天少吃一口，明天多穿一套', tag:'穿搭动力' },
-        { text:'脂肪是你的存款，但没人想要这种富翁', tag:'反向励志' },
-      ];
-      const fb = fallbacks[Math.floor(Math.random()*fallbacks.length)];
-      showSlogan(fb.text, fb.tag);
-    }
-    btn.innerHTML = '↻';
+    showSlogan(random);
   }
 
-  function showSlogan(text, tag) {
-    const el = document.getElementById('slogan-content');
-    const tw = document.getElementById('slogan-tag-wrap');
-    tw.innerHTML = '';
-    el.innerHTML = '';
-    let i = 0;
-    const cursor = document.createElement('span');
-    cursor.className = 'slogan-cursor';
-    el.appendChild(cursor);
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        el.insertBefore(document.createTextNode(text[i]), cursor);
-        i++;
-      } else {
-        clearInterval(interval);
-        setTimeout(() => { cursor.style.display = 'none'; }, 1200);
-        if (tag) tw.innerHTML = `<span class="slogan-tag">${tag}</span>`;
-      }
-    }, 60);
+  function showSlogan(text) {
+    document.getElementById('slogan-content').innerText = text;
   }
-
   const mealNames = { breakfast:'早餐', lunch:'午餐', dinner:'晚餐' };
 
-  async function generateRecipe(meal, btn) {
-    const card = document.getElementById('recipe-' + meal);
-    const origText = btn.textContent;
-    btn.textContent = '✦ 生成中...';
-    btn.classList.add('loading');
-    btn.disabled = true;
+  /* ===================== 食谱随机 ===================== */
+  function generateRecipe(meal) {
+      const list = LOCAL_RECIPES[meal];
+      const data = list[Math.floor(Math.random()*list.length)];
 
-    const prompt = `请为16:8轻断食计划推荐一道健康的【${mealNames[meal]}】食谱。
-要求：低卡高蛋白，减脂友好，简单易做，食材常见。
-只返回JSON，不要其他文字：
-{"name":"菜名","kcal":"约XXX卡","desc":"一句话描述做法和特点，40字以内","tags":[{"text":"标签1","type":"g"},{"text":"标签2","type":"b"},{"text":"标签3","type":"a"}]}
-type只能是g(绿色/营养)、b(蓝色/功效)、a(橙色/时间或特性)三种之一。`;
+      const card = document.getElementById('recipe-' + meal);
 
-    try {
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 300,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      const result = await resp.json();
-      const raw = result.content?.map(b => b.text || '').join('').trim();
-      const data = JSON.parse(raw.replace(/```json|```/g, '').trim());
-      const tagsHtml = (data.tags || []).map(t => `<span class="tag tag-${t.type||'g'}">${t.text}</span>`).join('');
+      const tagsHtml = data.tags.map(t =>
+              `<span class="tag tag-g">${t}</span>`
+      ).join('');
+
       card.innerHTML = `
-      <div class="recipe-top">
-        <div class="recipe-name">${data.name}</div>
-        <div class="recipe-kcal">${data.kcal}</div>
-      </div>
-      <div class="recipe-desc">${data.desc}</div>
-      <div class="tags">${tagsHtml}</div>
-      <button class="recipe-gen-btn" onclick="generateRecipe('${meal}', this)">✦ AI 再换一个</button>
-    `;
-      toast('已为你换了一道' + mealNames[meal] + ' 🍽️');
-    } catch(e) {
-      btn.textContent = origText;
-      btn.classList.remove('loading');
-      btn.disabled = false;
-      toast('生成失败，请重试');
-    }
+    <div class="recipe-top">
+      <div class="recipe-name">${data.name}</div>
+      <div class="recipe-kcal">${data.kcal}</div>
+    </div>
+    <div class="recipe-desc">${data.desc}</div>
+    <div class="tags">${tagsHtml}</div>
+    <button class="recipe-gen-btn" onclick="generateRecipe('${meal}', this)">
+      ✦ 再换一个
+    </button>
+  `;
   }
 
   /* --- init --- */
