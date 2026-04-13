@@ -1,765 +1,290 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>每日减肥打卡</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --green: #3a7d44;
-      --green-light: #e8f5e9;
-      --green-mid: #a5d6a7;
-      --green-dark: #1b5e20;
-      --amber: #f59e0b;
-      --amber-light: #fef3c7;
-      --blue: #2563eb;
-      --blue-light: #eff6ff;
-      --text: #1a1a1a;
-      --text-2: #555;
-      --text-3: #999;
-      --bg: #fafaf8;
-      --card: #ffffff;
-      --border: rgba(0,0,0,0.08);
-      --radius: 16px;
-      --radius-sm: 10px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
 
-    /* --- header --- */
-    .header {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 20px 12px;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .header-top { display: flex; align-items: center; justify-content: space-between; }
-    .app-title { font-family: 'Noto Serif SC', serif; font-size: 20px; font-weight: 600; color: var(--green-dark); }
-    .header-date { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  .arena{background:#1a0a0a;min-height:600px;border-radius:16px;overflow:hidden;position:relative;font-family:'Noto Sans SC',sans-serif;}
+  .bg-pattern{position:absolute;inset:0;opacity:0.04;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px;}
+  .title-bar{text-align:center;padding:14px 12px 10px;position:relative;z-index:2;}
+  .title-main{font-family:'Ma Shan Zheng',cursive;font-size:26px;color:#ff6b35;letter-spacing:4px;text-shadow:0 0 20px rgba(255,107,53,0.5);}
+  .title-sub{font-size:11px;color:#888;letter-spacing:2px;margin-top:2px;}
+  .hp-bar-row{display:flex;gap:10px;padding:0 12px 10px;position:relative;z-index:2;}
+  .hp-wrap{flex:1;}
+  .hp-name{font-size:11px;font-weight:700;margin-bottom:4px;letter-spacing:1px;}
+  .hp-name.mil{color:#ff6b35;text-align:left;}
+  .hp-name.dil{color:#a78bfa;text-align:right;}
+  .hp-bar{height:10px;border-radius:5px;background:#333;overflow:hidden;position:relative;}
+  .hp-fill{height:100%;border-radius:5px;transition:width 0.4s cubic-bezier(.34,1.56,.64,1);}
+  .hp-fill.mil{background:linear-gradient(90deg,#ff6b35,#ff9a3c);}
+  .hp-fill.dil{background:linear-gradient(90deg,#a78bfa,#c4b5fd);float:right;}
+  .hp-num{font-size:10px;color:#666;margin-top:2px;}
+  .hp-num.mil{text-align:left;}
+  .hp-num.dil{text-align:right;}
+  .stage{display:flex;align-items:flex-end;justify-content:space-between;padding:0 16px 0;position:relative;z-index:2;min-height:200px;}
+  .char-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;}
+  .char-face{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:50px;position:relative;transition:transform 0.15s;cursor:pointer;user-select:none;border:3px solid transparent;}
+  .char-face.mil{background:radial-gradient(circle at 40% 35%,#ff9a3c,#cc4400);border-color:#ff6b35;box-shadow:0 0 20px rgba(255,107,53,0.4);}
+  .char-face.dil{background:radial-gradient(circle at 40% 35%,#c4b5fd,#7c3aed);border-color:#a78bfa;box-shadow:0 0 20px rgba(167,139,250,0.4);}
+  .char-face:active{transform:scale(0.92);}
+  .char-face.shake{animation:shake 0.4s ease;}
+  .char-face.attack-right{animation:atk-r 0.35s ease;}
+  .char-face.attack-left{animation:atk-l 0.35s ease;}
+  .char-face.hit{animation:hit-flash 0.3s ease;}
+  .char-name{font-size:13px;font-weight:700;letter-spacing:1px;}
+  .char-name.mil{color:#ff6b35;}
+  .char-name.dil{color:#a78bfa;}
+  .char-title{font-size:10px;color:#666;letter-spacing:1px;}
+  .char-status{font-size:18px;margin-top:2px;min-height:24px;}
+  .vs-center{display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:20px;}
+  .vs-text{font-family:'Ma Shan Zheng',cursive;font-size:30px;color:#ff6b35;text-shadow:0 0 15px rgba(255,107,53,0.6);}
+  .round-badge{background:#2a1a0a;border:1px solid #ff6b35;border-radius:20px;padding:2px 10px;font-size:11px;color:#ff9a3c;}
+  .bubble-zone{min-height:80px;padding:8px 14px;position:relative;z-index:2;}
+  .bubble{border-radius:12px;padding:10px 14px;max-width:75%;font-size:13px;line-height:1.5;position:relative;animation:pop-in 0.3s cubic-bezier(.34,1.56,.64,1);}
+  .bubble.mil{background:#2a1005;border:1px solid #ff6b35;color:#ffcca0;border-radius:12px 12px 12px 2px;margin-left:0;}
+  .bubble.dil{background:#1a0d2e;border:1px solid #a78bfa;color:#ddd6fe;border-radius:12px 12px 2px 12px;margin-left:auto;}
+  .bubble::after{content:attr(data-emotion);position:absolute;top:-10px;right:8px;font-size:16px;}
+  .action-bar{padding:8px 12px;position:relative;z-index:2;}
+  .action-label{font-size:10px;color:#555;letter-spacing:2px;margin-bottom:6px;}
+  .btn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+  .btn-grid.dil-btns{margin-top:6px;}
+  .atk-btn{padding:9px 8px;border-radius:10px;border:1px solid;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;position:relative;overflow:hidden;}
+  .atk-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.1);opacity:0;transition:opacity 0.15s;}
+  .atk-btn:hover::before{opacity:1;}
+  .atk-btn:active{transform:scale(0.95);}
+  .atk-btn.mil-btn{background:#1a0800;border-color:#cc4400;color:#ff9a3c;}
+  .atk-btn.dil-btn{background:#0d0520;border-color:#7c3aed;color:#c4b5fd;}
+  .btn-divider{text-align:center;font-size:10px;color:#444;letter-spacing:2px;margin:6px 0 4px;}
+  .effect-layer{position:absolute;inset:0;pointer-events:none;z-index:10;overflow:hidden;}
+  .hit-effect{position:absolute;font-size:28px;font-weight:900;pointer-events:none;animation:fly-up 0.7s ease forwards;}
+  .crack-text{position:absolute;font-family:'Ma Shan Zheng',cursive;font-size:22px;pointer-events:none;animation:crack-anim 0.8s ease forwards;}
+  .combo-flash{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Ma Shan Zheng',cursive;font-size:48px;pointer-events:none;animation:combo-anim 0.6s ease forwards;white-space:nowrap;}
+  .log-area{padding:6px 14px 10px;max-height:80px;overflow-y:auto;scrollbar-width:none;}
+  .log-area::-webkit-scrollbar{display:none;}
+  .log-line{font-size:11px;color:#555;line-height:1.6;border-left:2px solid #222;padding-left:6px;margin-bottom:2px;}
+  .log-line.new{color:#888;border-left-color:#444;}
+  .result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;border-radius:16px;}
+  .result-title{font-family:'Ma Shan Zheng',cursive;font-size:48px;margin-bottom:12px;animation:result-pop 0.5s cubic-bezier(.34,1.56,.64,1);}
+  .result-msg{font-size:16px;color:#aaa;margin-bottom:20px;text-align:center;line-height:1.6;}
+  .restart-btn{background:#ff6b35;color:#fff;border:none;padding:12px 32px;border-radius:25px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:2px;transition:transform 0.15s;}
+  .restart-btn:active{transform:scale(0.95);}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
+  @keyframes atk-r{0%{transform:translateX(0);}40%{transform:translateX(30px) scale(1.1);}100%{transform:translateX(0);}}
+  @keyframes atk-l{0%{transform:translateX(0);}40%{transform:translateX(-30px) scale(1.1);}100%{transform:translateX(0);}}
+  @keyframes hit-flash{0%{filter:brightness(1);}30%{filter:brightness(3);}60%{filter:brightness(0.5);}100%{filter:brightness(1);}}
+  @keyframes fly-up{0%{opacity:1;transform:translate(-50%,-50%) scale(0.5);}60%{opacity:1;transform:translate(-50%,-120%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-180%) scale(0.8);}}
+  @keyframes crack-anim{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3) rotate(-10deg);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(5deg);}100%{opacity:0;transform:translate(-50%,-80%) scale(0.9) rotate(-3deg);}}
+  @keyframes combo-anim{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1);}}
+  @keyframes pop-in{0%{opacity:0;transform:scale(0.7);}100%{opacity:1;transform:scale(1);}}
+  @keyframes result-pop{0%{transform:scale(0.3);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  @keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(255,107,53,0.4);}50%{box-shadow:0 0 40px rgba(255,107,53,0.8);}}
+</style>
 
-    /* --- slogan banner 炫酷版 --- */
-    .slogan-banner {
-      margin: 16px 16px 0;
-      background: #0d0d0d;
-      border-radius: var(--radius);
-      padding: 20px 18px 18px;
-      position: relative;
-      overflow: hidden;
-      min-height: 110px;
-      border: 1px solid rgba(255,255,255,0.07);
-    }
-    .slogan-glow {
-      position: absolute; top: -40px; left: 20%; width: 60%; height: 80px;
-      background: radial-gradient(ellipse, rgba(74,222,128,0.25) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .slogan-grid {
-      position: absolute; inset: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 24px 24px;
-      pointer-events: none;
-    }
-    .slogan-label {
-      font-size: 10px; color: rgba(74,222,128,0.7); margin-bottom: 10px;
-      letter-spacing: 0.15em; text-transform: uppercase; position: relative;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .slogan-label::before {
-      content: ''; width: 6px; height: 6px; border-radius: 50%;
-      background: #4ade80; display: inline-block;
-      box-shadow: 0 0 6px #4ade80;
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-    .slogan-content {
-      font-family: 'Noto Serif SC', serif; font-size: 18px; color: #fff;
-      line-height: 1.6; font-weight: 600; position: relative; min-height: 30px;
-      letter-spacing: 0.02em;
-    }
-    .slogan-cursor {
-      display: inline-block; width: 2px; height: 1.1em;
-      background: #4ade80; margin-left: 2px; vertical-align: middle;
-      animation: blink 1s step-end infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-    .slogan-tag {
-      display: inline-block; margin-top: 10px; font-size: 11px;
-      background: rgba(74,222,128,0.15); color: #4ade80;
-      padding: 3px 10px; border-radius: 20px;
-      border: 1px solid rgba(74,222,128,0.3); position: relative;
-    }
-    .slogan-refresh {
-      position: absolute; right: 14px; top: 16px;
-      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; color: rgba(255,255,255,0.6); font-size: 16px; cursor: pointer;
-      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; z-index: 2;
-    }
-    .slogan-refresh:hover { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
-    .slogan-refresh:active { transform: scale(0.93); }
-    .slogan-loading { color: rgba(255,255,255,0.3); font-size: 14px; font-family: 'DM Sans',sans-serif; font-weight: 400; }
+<h2 class="sr-only">婆媳修罗场互动游戏，点击按钮让婆婆和媳妇互怼</h2>
+<div class="arena" id="arena">
+  <div class="bg-pattern"></div>
+  <div class="effect-layer" id="fx"></div>
 
-    /* --- tabs --- */
-    .tabs {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: var(--card);
-      border-top: 1px solid var(--border);
-      display: flex;
-      z-index: 50;
-      padding-bottom: env(safe-area-inset-bottom, 0);
-    }
-    .tab-btn {
-      flex: 1; padding: 10px 0 8px; border: none; background: transparent;
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
-      cursor: pointer; transition: color 0.15s;
-      color: var(--text-3); font-size: 11px;
-    }
-    .tab-btn.active { color: var(--green); }
-    .tab-icon { font-size: 22px; line-height: 1; }
+  <div class="title-bar">
+    <div class="title-main">婆媳修罗场</div>
+    <div class="title-sub">◆ 家庭战争模拟器 · 年度终极对决 ◆</div>
+  </div>
 
-    /* --- page sections --- */
-    .page { display: none; padding: 16px 16px calc(90px + env(safe-area-inset-bottom, 16px)); }
-    .page.active { display: block; }
-
-    /* --- cards --- */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    .card-title {
-      font-size: 12px; color: var(--text-3);
-      letter-spacing: 0.05em; margin-bottom: 12px;
-    }
-
-    /* --- stat row --- */
-    .stat-row { display: flex; gap: 10px; margin-bottom: 12px; }
-    .stat-box {
-      flex: 1; background: var(--bg); border-radius: var(--radius-sm);
-      padding: 12px 10px; text-align: center; border: 1px solid var(--border);
-    }
-    .stat-num { font-size: 24px; font-weight: 500; color: var(--text); line-height: 1; }
-    .stat-unit { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-    .stat-lbl { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
-
-    /* --- checkin button --- */
-    .checkin-btn {
-      width: 100%; padding: 16px; border-radius: var(--radius);
-      font-size: 16px; font-weight: 500; border: none; cursor: pointer;
-      transition: all 0.2s; margin-bottom: 12px;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .checkin-btn.todo { background: var(--green); color: #fff; }
-    .checkin-btn.done { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--green-mid); }
-    .checkin-btn:active { transform: scale(0.97); }
-
-    /* --- task list --- */
-    .task-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer;
-    }
-    .task-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .task-circle {
-      width: 22px; height: 22px; border-radius: 50%;
-      border: 1.5px solid #ccc; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.15s;
-    }
-    .task-circle.on { background: var(--green); border-color: var(--green); }
-    .task-circle.on::after { content: ''; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block; }
-    .task-info .task-name { font-size: 14px; color: var(--text); }
-    .task-info .task-sub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
-
-    /* --- weight input --- */
-    .input-row { display: flex; gap: 8px; }
-    .weight-inp {
-      flex: 1; padding: 10px 14px; border: 1px solid var(--border);
-      border-radius: var(--radius-sm); font-size: 15px; color: var(--text);
-      background: var(--bg); outline: none;
-    }
-    .weight-inp:focus { border-color: var(--green); }
-    .save-btn {
-      padding: 10px 18px; background: var(--green-light); color: var(--green-dark);
-      border: 1px solid var(--green-mid); border-radius: var(--radius-sm);
-      font-size: 14px; cursor: pointer; white-space: nowrap;
-    }
-    .save-btn:active { transform: scale(0.97); }
-    .hint-text { font-size: 12px; color: var(--text-3); margin-top: 6px; }
-
-    /* --- recipe --- */
-    .meal-label { font-size: 11px; color: var(--text-3); letter-spacing: 0.06em; margin-bottom: 8px; }
-    .recipe-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
-    .recipe-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-    .recipe-name { font-size: 15px; font-weight: 500; color: var(--text); }
-    .recipe-kcal { font-size: 12px; color: var(--text-3); background: var(--bg); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--border); }
-    .recipe-desc { font-size: 13px; color: var(--text-2); line-height: 1.55; margin-bottom: 8px; }
-    .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-    .tag { font-size: 11px; padding: 2px 9px; border-radius: 20px; }
-    .tag-g { background: var(--green-light); color: var(--green-dark); }
-    .tag-b { background: var(--blue-light); color: var(--blue); }
-    .tag-a { background: var(--amber-light); color: #92400e; }
-    .recipe-gen-btn {
-      width: 100%; margin-top: 12px; padding: 10px;
-      background: transparent; border: 1px dashed rgba(0,0,0,0.15);
-      border-radius: var(--radius-sm); font-size: 13px; color: var(--text-3);
-      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .recipe-gen-btn:hover { background: var(--green-light); color: var(--green-dark); border-color: var(--green-mid); border-style: solid; }
-    .recipe-gen-btn:active { transform: scale(0.98); }
-    .recipe-gen-btn.loading { color: var(--green); border-style: solid; border-color: var(--green-mid); }
-    .fasting-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-    .fasting-row { font-size: 12px; color: var(--text-2); line-height: 1.7; }
-    .progress-wrap { margin: 6px 0; }
-    .progress-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); margin-bottom: 4px; }
-    .progress-bar { height: 6px; background: var(--bg); border-radius: 3px; border: 1px solid var(--border); }
-    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
-
-    /* --- calendar --- */
-    .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
-    .cal-wd { font-size: 11px; color: var(--text-3); }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-    .cal-cell { aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-3); }
-    .cal-cell.checked { background: var(--green); color: #fff; font-weight: 500; }
-    .cal-cell.today { border: 1.5px solid var(--blue); color: var(--blue); font-weight: 500; }
-
-    /* --- weight chart --- */
-    .wchart { display: flex; align-items: flex-end; gap: 5px; height: 80px; margin: 8px 0; }
-    .wbar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-    .wbar { width: 100%; border-radius: 4px 4px 0 0; background: #bfdbfe; min-height: 4px; }
-    .wbar-lbl { font-size: 10px; color: var(--text-3); }
-
-    /* --- toast --- */
-    .toast {
-      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-      background: rgba(30,30,30,0.85); color: #fff;
-      padding: 10px 20px; border-radius: 30px; font-size: 14px;
-      opacity: 0; transition: opacity 0.25s; pointer-events: none;
-      white-space: nowrap; z-index: 200; backdrop-filter: blur(8px);
-    }
-    .toast.show { opacity: 1; }
-
-    /* --- history slogans --- */
-    .history-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
-    .history-item:last-child { border-bottom: none; }
-    .history-date { font-size: 11px; color: var(--text-3); margin-bottom: 3px; }
-    .history-text { font-size: 13px; color: var(--text-2); line-height: 1.5; }
-
-    /* animations */
-    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .page.active .card, .page.active .recipe-card { animation: fadeUp 0.25s ease both; }
-    .page.active .card:nth-child(2) { animation-delay: 0.04s; }
-    .page.active .card:nth-child(3) { animation-delay: 0.08s; }
-    .page.active .card:nth-child(4) { animation-delay: 0.12s; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinning { animation: spin 0.8s linear infinite; display: inline-block; }
-  </style>
-</head>
-<body>
-
-<!-- header -->
-<div class="header">
-  <div class="header-top">
-    <div>
-      <div class="app-title">🌱 每日减肥打卡</div>
-      <div class="header-date" id="header-date"></div>
+  <div class="hp-bar-row">
+    <div class="hp-wrap">
+      <div class="hp-name mil">婆婆 怒气值</div>
+      <div class="hp-bar"><div class="hp-fill mil" id="mil-hp" style="width:100%"></div></div>
+      <div class="hp-num mil" id="mil-hp-num">100 / 100</div>
     </div>
+    <div class="hp-wrap">
+      <div class="hp-name dil" style="text-align:right">媳妇 耐心值</div>
+      <div class="hp-bar"><div class="hp-fill dil" id="dil-hp" style="width:100%"></div></div>
+      <div class="hp-num dil" id="dil-hp-num">100 / 100</div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="char-wrap">
+      <div class="char-face mil" id="mil-face" onclick="charClick('mil')">👵</div>
+      <div class="char-name mil">王秀珍</div>
+      <div class="char-title" style="color:#ff9a3c55">婆婆 · 战斗力 MAX</div>
+      <div class="char-status" id="mil-status">😤</div>
+    </div>
+    <div class="vs-center">
+      <div class="vs-text">VS</div>
+      <div class="round-badge" id="round-badge">第 1 回合</div>
+    </div>
+    <div class="char-wrap">
+      <div class="char-face dil" id="dil-face" onclick="charClick('dil')">👩</div>
+      <div class="char-name dil">林小美</div>
+      <div class="char-title" style="color:#a78bfa55">媳妇 · 忍耐极限</div>
+      <div class="char-status" id="dil-status">😑</div>
+    </div>
+  </div>
+
+  <div class="bubble-zone" id="bubble-zone">
+    <div class="bubble mil" data-emotion="💢">我儿子娶你之前，白白净净的，现在瞧瞧，一顿饭能吃三碗！</div>
+  </div>
+
+  <div class="action-bar">
+    <div class="action-label">— 婆婆出招 —</div>
+    <div class="btn-grid">
+      <button class="atk-btn mil-btn" onclick="milAttack(0)">👶 催生大法</button>
+      <button class="atk-btn mil-btn" onclick="milAttack(1)">🍳 嫌弃厨艺</button>
+      <button class="atk-btn mil-btn" onclick="milAttack(2)">💸 哭穷要钱</button>
+      <button class="atk-btn mil-btn" onclick="milAttack(3)">📺 前女友比较</button>
+    </div>
+    <div class="btn-divider">— 媳妇反击 —</div>
+    <div class="btn-grid dil-btns">
+      <button class="atk-btn dil-btn" onclick="dilAttack(0)">🔥 怼回去</button>
+      <button class="atk-btn dil-btn" onclick="dilAttack(1)">😤 翻旧账</button>
+      <button class="atk-btn dil-btn" onclick="dilAttack(2)">📱 找老公评理</button>
+      <button class="atk-btn dil-btn" onclick="dilAttack(3)">🧳 威胁离婚</button>
+    </div>
+  </div>
+
+  <div class="log-area" id="log-area"></div>
+
+  <div class="result-overlay" id="result" style="display:none">
+    <div class="result-title" id="result-title" style="color:#ff6b35">婆婆赢了！</div>
+    <div class="result-msg" id="result-msg">媳妇耐心耗尽，选择沉默是金</div>
+    <button class="restart-btn" onclick="restart()">再来一局 🔄</button>
   </div>
 </div>
-
-<!-- AI slogan banner -->
-<div class="slogan-banner">
-  <div class="slogan-glow"></div>
-  <div class="slogan-grid"></div>
-  <button class="slogan-refresh" id="slogan-refresh-btn" onclick="generateSlogan(true)" title="换一句">↻</button>
-  <div class="slogan-label">今日口号 · AI 生成</div>
-  <div class="slogan-content" id="slogan-content"><span class="slogan-loading">正在生成今日口号...</span></div>
-  <div id="slogan-tag-wrap"></div>
-</div>
-
-<!-- pages -->
-<!-- 打卡 -->
-<div class="page active" id="page-checkin">
-  <div class="stat-row">
-    <div class="stat-box">
-      <div class="stat-lbl">连续打卡</div>
-      <div class="stat-num" id="streak">0</div>
-      <div class="stat-unit">天</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-lbl">本月完成</div>
-      <div class="stat-num" id="monthcount">0</div>
-      <div class="stat-unit">天</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-lbl">目标体重</div>
-      <div class="stat-num" id="goal-display">--</div>
-      <div class="stat-unit">kg</div>
-    </div>
-  </div>
-
-  <button class="checkin-btn todo" id="checkin-btn" onclick="doCheckin()">
-    <span id="checkin-icon">✓</span>
-    <span id="checkin-text">今日打卡</span>
-  </button>
-
-  <div class="card">
-    <div class="card-title">今日任务</div>
-    <div class="task-item" onclick="toggleTask(0)">
-      <div class="task-circle" id="t0"></div>
-      <div class="task-info"><div class="task-name">喝够 8 杯水</div><div class="task-sub">保持水分，促进代谢</div></div>
-    </div>
-    <div class="task-item" onclick="toggleTask(1)">
-      <div class="task-circle" id="t1"></div>
-      <div class="task-info"><div class="task-name">运动 30 分钟</div><div class="task-sub">有氧 / 散步 / 瑜伽均可</div></div>
-    </div>
-    <div class="task-item" onclick="toggleTask(2)">
-      <div class="task-circle" id="t2"></div>
-      <div class="task-info"><div class="task-name">遵守断食窗口</div><div class="task-sub">16:8 进食时间 12:00 ~ 20:00</div></div>
-    </div>
-    <div class="task-item" onclick="toggleTask(3)">
-      <div class="task-circle" id="t3"></div>
-      <div class="task-info"><div class="task-name">睡前不吃东西</div><div class="task-sub">20:00 后停止进食</div></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">记录体重</div>
-    <div class="input-row">
-      <input class="weight-inp" type="number" id="weight-inp" placeholder="今日体重 (kg)" step="0.1" min="30" max="200">
-      <button class="save-btn" onclick="saveWeight()">记录</button>
-    </div>
-    <div class="hint-text" id="weight-hint">暂无记录</div>
-  </div>
-</div>
-
-<!-- 食谱 -->
-<div class="page" id="page-recipe">
-  <div class="meal-label">☀️ 早餐 · 12:00 开餐</div>
-  <div class="recipe-card" id="recipe-breakfast">
-    <div class="recipe-top">
-      <div class="recipe-name">燕麦希腊酸奶碗</div>
-      <div class="recipe-kcal">约 320 卡</div>
-    </div>
-    <div class="recipe-desc">即食燕麦 + 无糖希腊酸奶 + 少量蓝莓蜂蜜。高蛋白低糖，开餐第一餐饱腹感强，5 分钟搞定。</div>
-    <div class="tags">
-      <span class="tag tag-g">高蛋白</span>
-      <span class="tag tag-b">低GI</span>
-      <span class="tag tag-a">5分钟</span>
-    </div>
-    <button class="recipe-gen-btn" onclick="generateRecipe('breakfast', this)">✦ AI 换一个早餐</button>
-  </div>
-
-  <div class="meal-label">🌤 午餐 · 15:00</div>
-  <div class="recipe-card" id="recipe-lunch">
-    <div class="recipe-top">
-      <div class="recipe-name">鸡胸肉藜麦沙拉</div>
-      <div class="recipe-kcal">约 450 卡</div>
-    </div>
-    <div class="recipe-desc">水煮鸡胸切丝 + 煮熟藜麦 + 黄瓜番茄 + 橄榄油柠檬汁拌匀。营养均衡，控卡不控量感。</div>
-    <div class="tags">
-      <span class="tag tag-g">减脂</span>
-      <span class="tag tag-b">高纤维</span>
-      <span class="tag tag-g">优质碳水</span>
-    </div>
-    <button class="recipe-gen-btn" onclick="generateRecipe('lunch', this)">✦ AI 换一个午餐</button>
-  </div>
-
-  <div class="meal-label">🌙 晚餐 · 18:00（20:00 前结束）</div>
-  <div class="recipe-card" id="recipe-dinner">
-    <div class="recipe-top">
-      <div class="recipe-name">清蒸三文鱼 + 蒸蔬菜</div>
-      <div class="recipe-kcal">约 380 卡</div>
-    </div>
-    <div class="recipe-desc">三文鱼 200g 清蒸，搭配西蓝花、胡萝卜蒸熟。富含 Omega-3，帮助抗炎促代谢，清淡不腻。</div>
-    <div class="tags">
-      <span class="tag tag-b">Omega-3</span>
-      <span class="tag tag-g">低卡</span>
-      <span class="tag tag-a">15分钟</span>
-    </div>
-    <button class="recipe-gen-btn" onclick="generateRecipe('dinner', this)">✦ AI 换一个晚餐</button>
-  </div>
-
-  <div class="recipe-card">
-    <div class="progress-wrap">
-      <div class="progress-lbl"><span>热量进度</span><span>1150 / 1400 卡</span></div>
-      <div class="progress-bar"><div class="progress-fill" style="width:82%;background:var(--green);"></div></div>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-lbl"><span>蛋白质</span><span>85 / 100g</span></div>
-      <div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--blue);"></div></div>
-    </div>
-  </div>
-
-  <div class="fasting-box">
-    <div class="fasting-title">⏱ 16:8 轻断食时间窗口</div>
-    <div class="fasting-row">
-      进食：12:00 — 20:00（8 小时）<br>
-      断食：20:00 — 12:00（16 小时）<br>
-      <span style="color:var(--text-3);font-size:11px;">断食期间可饮水、黑咖啡、无糖茶</span>
-    </div>
-  </div>
-</div>
-
-<!-- 记录 -->
-<div class="page" id="page-stats">
-  <div class="card">
-    <div class="card-title">本月打卡日历</div>
-    <div class="cal-header" id="cal-wd"></div>
-    <div class="cal-grid" id="cal-grid"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">体重趋势（近 7 天）</div>
-    <div class="wchart" id="wchart"><div style="font-size:12px;color:var(--text-3);align-self:center;width:100%;text-align:center;">暂无体重数据</div></div>
-    <div class="hint-text" id="wchart-range"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">设置目标体重</div>
-    <div class="input-row">
-      <input class="weight-inp" type="number" id="goal-inp" placeholder="目标体重 (kg)" step="0.1" min="30" max="200">
-      <button class="save-btn" onclick="saveGoal()">保存</button>
-    </div>
-  </div>
-
-  <div class="card" id="slogan-history-card" style="display:none;">
-    <div class="card-title">近期口号回顾</div>
-    <div id="slogan-history"></div>
-  </div>
-</div>
-
-<!-- tabs -->
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('checkin',this)">
-    <span class="tab-icon">✅</span>打卡
-  </button>
-  <button class="tab-btn" onclick="switchTab('recipe',this)">
-    <span class="tab-icon">🥗</span>食谱
-  </button>
-  <button class="tab-btn" onclick="switchTab('stats',this)">
-    <span class="tab-icon">📊</span>记录
-  </button>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-  const K = { checkins:'dcd_checkins', weights:'dcd_weights', tasks:'dcd_tasks', goal:'dcd_goal', slogans:'dcd_slogans' };
-
-  function todayStr() { return new Date().toISOString().slice(0,10); }
-  function load(k) { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } }
-  function save(k,v) { localStorage.setItem(k, JSON.stringify(v)); }
-
-  /* ===================== 口号库（50+） ===================== */
-  const LOCAL_SLOGANS = [
-    '再吃一口是放纵，不吃这一口是人生转折',
-    '今天不减肥，明天徒伤悲',
-    '你不是饿，你只是想找点乐子',
-    '脂肪：我不走，你也别想跑',
-    '再忍一口，明天瘦一斤（心理安慰版）',
-    '管住嘴的人，已经赢了一半人生',
-    '吃是本能，瘦是本事',
-    '今天吃少一点，明天镜子顺眼一点',
-    '你和瘦子之间，只差一个“忍”字',
-    '嘴巴爽5秒，脂肪跟你5个月',
-    '今天不自律，明天徒伤悲',
-    '减肥不是不吃，是少吃',
-    '你可以不瘦，但不能一直胖',
-    '吃多不幸福，瘦下来才快乐',
-    '你吃的不是饭，是未来的负担',
-    '体重不会骗人，嘴巴会',
-    '今天忍住，明天赢',
-    '瘦下来你会感谢今天的自己',
-    '嘴巴一时爽，体重火葬场',
-    '减肥就是和自己较劲',
-    '你不是控制不了，是不想控制',
-    '少吃一口，离目标更近一步',
-    '今天少一口，明天多一分自信',
-    '别问能不能瘦，问你忍不忍',
-    '你吃下去的，每一口都会回来',
-    '今天忍住，未来轻松',
-    '减肥没有捷径，只有克制',
-    '不是你胖，是你吃太认真',
-    '嘴巴赢了，身材输了',
-    '你可以懒，但不能胖',
-    '今天不努力，脂肪更努力',
-    '减肥就是延迟满足',
-    '你可以吃，但要值得',
-    '你控制的不是食物，是人生',
-    '吃一口不胖，但天天吃会',
-    '瘦下来世界都不一样',
-    '今天吃少一点，明天开心一点',
-    '控制饮食，就是控制未来',
-    '减肥不是苦，是成长',
-    '再坚持一下，真的会瘦',
-    '你离瘦，只差一点点忍耐',
-    '今天不吃宵夜，明天不后悔',
-    '每一口都是选择',
-    '你可以赢，只要你忍',
-    '吃的每一口，都有代价',
-    '控制住今晚，就是赢家',
-    '别输给深夜的自己',
-    '今天不放纵，明天不后悔',
-    '瘦下来，世界都温柔了',
-    '你不是做不到，是不够狠'
+  const milLines = [
+    ["都这个岁数了还不要孩子，你是不是有问题啊？","我就说嘛，你们年轻人啊，自私！","趁年轻生，老了生不了哭去吧！","我儿子等不起啊，你知道吗！"],
+    ["你这菜做的什么玩意儿？放那么多盐！","我儿子从小吃我做的菜，哪受过这委屈","连个饭都做不好，还指望干啥？","我给你看看什么叫真正的家常菜！"],
+    ["你们挣那么多钱，就不知道孝敬孝敬我们？","我生儿子养儿子，到头来落这下场？","你妈那边肯定没少拿吧，我们就啥都没有？","钱进了你口袋就是你的了，是不是！"],
+    ["他前女友多懂事啊，人家妈妈我都认识","人家不像你，眼睛长头顶上","早知道就让他们在一起了，多好","你哪里比得上人家呢，就说说嘛"]
   ];
+  const dilLines = [
+    ["您催我不如催您儿子，造孩子要两个人的！","生不生是我的身体我的权利，您管得着吗？","您要是那么想要孙子，自己再生一个啊！","催催催，您催孩子读书这么上心就好了！"],
+    ["我做饭是一般，可您儿子也没嫌弃过啊？","您天天指点，要不您来做，我洗碗行了吧？","每个人口味不同，您没听说过吗？","您要觉得我做得不好，大可以自己动手！"],
+    ["我们挣的钱贴补家用已经够多了，有账吗？","您儿子的钱也是我们共同挣的，凭什么只算我的？","这话说的，好像我欠您几百万一样！","孝顺是心意，不是交换，您搞清楚！"],
+    ["那您当初怎么不让他们在一起呢？","喜欢她你去找她啊，我又没拦着！","比来比去，您儿子是二手市场的货吗？","这辈子我都不嫁人了，省得天天被比较！"]
+  ];
+  const hitFx = ["💥","👊","⚡","💢","🔥","💫","✨","😱"];
+  const crackWords = ["绝了！","实名diss！","致命一击！","破防了！","狠话！","太真实了！","话糙理不糙！","我emo了"];
+  let milHp=100,dilHp=100,round=1,busy=false,combo=0,lastAttacker='';
 
-  /* ===================== 食谱库 ===================== */
-  const LOCAL_RECIPES = {
-    breakfast: [
-      {name:'鸡蛋牛油果吐司',kcal:'320卡',desc:'全麦+鸡蛋+牛油果，简单营养',tags:['高蛋白','健康脂肪']},
-      {name:'燕麦水果碗',kcal:'300卡',desc:'燕麦+香蕉+蓝莓',tags:['低GI','快手']},
-      {name:'酸奶坚果碗',kcal:'350卡',desc:'无糖酸奶+坚果',tags:['高蛋白']},
-      {name:'鸡蛋三明治',kcal:'330卡',desc:'全麦+鸡蛋+生菜',tags:['均衡']},
-      {name:'蛋白奶昔',kcal:'280卡',desc:'蛋白粉+牛奶',tags:['增肌']},
-      {name:'香蕉燕麦饼',kcal:'310卡',desc:'香蕉+燕麦煎',tags:['低脂']},
-      {name:'豆浆+鸡蛋',kcal:'290卡',desc:'传统早餐',tags:['清淡']},
-      {name:'玉米+鸡蛋',kcal:'260卡',desc:'简单顶饱',tags:['低卡']},
-      {name:'酸奶水果杯',kcal:'300卡',desc:'轻食组合',tags:['健康']},
-      {name:'全麦面包+鸡胸',kcal:'340卡',desc:'高蛋白组合',tags:['减脂']}
-    ],
-    lunch: [
-      {name:'鸡胸沙拉',kcal:'450卡',desc:'鸡胸+蔬菜',tags:['减脂']},
-      {name:'牛肉饭',kcal:'500卡',desc:'瘦牛肉+米饭',tags:['高蛋白']},
-      {name:'虾仁蔬菜',kcal:'420卡',desc:'低脂高蛋白',tags:['低卡']},
-      {name:'鸡胸意面',kcal:'480卡',desc:'全麦意面',tags:['低GI']},
-      {name:'三文鱼沙拉',kcal:'460卡',desc:'健康脂肪',tags:['Omega3']},
-      {name:'牛肉卷',kcal:'470卡',desc:'高蛋白组合',tags:['健身']},
-      {name:'鸡蛋蔬菜碗',kcal:'430卡',desc:'简单健康',tags:['清淡']},
-      {name:'杂粮饭+鸡胸',kcal:'450卡',desc:'优质碳水',tags:['均衡']},
-      {name:'藜麦沙拉',kcal:'440卡',desc:'低GI食物',tags:['健康']},
-      {name:'轻食拼盘',kcal:'420卡',desc:'多样组合',tags:['减脂']}
-    ],
-    dinner: [
-      {name:'西兰花鸡胸',kcal:'300卡',desc:'低脂高蛋白',tags:['减脂']},
-      {name:'番茄鸡蛋汤',kcal:'250卡',desc:'清淡好消化',tags:['清淡']},
-      {name:'虾仁蔬菜',kcal:'280卡',desc:'低卡晚餐',tags:['低卡']},
-      {name:'三文鱼',kcal:'350卡',desc:'优质脂肪',tags:['健康']},
-      {name:'鸡蛋沙拉',kcal:'260卡',desc:'简单轻食',tags:['轻食']},
-      {name:'蔬菜汤',kcal:'200卡',desc:'低热量',tags:['减脂']},
-      {name:'豆腐蔬菜',kcal:'270卡',desc:'植物蛋白',tags:['健康']},
-      {name:'鸡胸+青菜',kcal:'300卡',desc:'经典减脂餐',tags:['减脂']},
-      {name:'蒸鱼',kcal:'320卡',desc:'清淡营养',tags:['健康']},
-      {name:'凉拌鸡丝',kcal:'290卡',desc:'爽口低脂',tags:['低卡']}
-    ]
-  };
+  function $(id){return document.getElementById(id);}
 
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2200);
+  function updateHp(){
+    $('mil-hp').style.width=milHp+'%';
+    $('dil-hp').style.width=dilHp+'%';
+    $('mil-hp-num').textContent=milHp+' / 100';
+    $('dil-hp-num').textContent=dilHp+' / 100';
+    $('mil-status').textContent=milHp>66?'😤':milHp>33?'😡':'🤯';
+    $('dil-status').textContent=dilHp>66?'😑':dilHp>33?'😠':'😭';
   }
 
-  function switchTab(name, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
-    if (btn) btn.classList.add('active');
-    if (name === 'stats') { renderCalendar(); renderWeightChart(); renderSloganHistory(); }
+  function showBubble(text,side,emotion){
+    const zone=$('bubble-zone');
+    const b=document.createElement('div');
+    b.className='bubble '+side;
+    b.textContent=text;
+    b.setAttribute('data-emotion',emotion||'');
+    zone.innerHTML='';
+    zone.appendChild(b);
   }
 
-  /* --- checkin --- */
-  function doCheckin() {
-    const today = todayStr(), checkins = load(K.checkins);
-    if (checkins[today]) { toast('今天已经打卡啦！继续保持 💪'); return; }
-    checkins[today] = true;
-    save(K.checkins, checkins);
-    refreshCheckinUI();
-    toast('打卡成功！今天也是奋斗的一天 🌱');
-  }
-
-  function refreshCheckinUI() {
-    const today = todayStr(), checkins = load(K.checkins);
-    const done = !!checkins[today];
-    const btn = document.getElementById('checkin-btn');
-    btn.className = 'checkin-btn ' + (done ? 'done' : 'todo');
-    document.getElementById('checkin-text').textContent = done ? '今日已打卡' : '今日打卡';
-    document.getElementById('checkin-icon').textContent = done ? '✓' : '✓';
-
-    let streak = 0, d = new Date();
-    while (checkins[d.toISOString().slice(0,10)]) { streak++; d.setDate(d.getDate()-1); }
-    document.getElementById('streak').textContent = streak;
-
-    const now = new Date();
-    const prefix = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-    const month = Object.keys(checkins).filter(k => k.startsWith(prefix)).length;
-    document.getElementById('monthcount').textContent = month;
-  }
-
-  /* --- tasks --- */
-  function toggleTask(i) {
-    const today = todayStr(), tasks = load(K.tasks);
-    if (!tasks[today]) tasks[today] = {};
-    tasks[today][i] = !tasks[today][i];
-    save(K.tasks, tasks);
-    document.getElementById('t'+i).classList.toggle('on', !!tasks[today][i]);
-  }
-
-  function loadTasks() {
-    const t = (load(K.tasks)[todayStr()] || {});
-    for (let i=0;i<4;i++) document.getElementById('t'+i).classList.toggle('on', !!t[i]);
-  }
-
-  /* --- weight --- */
-  function saveWeight() {
-    const v = parseFloat(document.getElementById('weight-inp').value);
-    if (!v || v < 30 || v > 200) { toast('请输入有效体重'); return; }
-    const w = load(K.weights);
-    w[todayStr()] = v;
-    save(K.weights, w);
-    document.getElementById('weight-inp').value = '';
-    updateWeightHint();
-    toast('体重已记录：' + v.toFixed(1) + ' kg');
-  }
-
-  function updateWeightHint() {
-    const w = load(K.weights), today = todayStr();
-    const hint = document.getElementById('weight-hint');
-    if (w[today]) { hint.textContent = '今日体重：' + w[today].toFixed(1) + ' kg'; return; }
-    const keys = Object.keys(w).sort().reverse();
-    hint.textContent = keys.length ? '最近记录：' + w[keys[0]].toFixed(1) + ' kg（' + keys[0] + '）' : '暂无记录';
-  }
-
-  /* --- goal --- */
-  function saveGoal() {
-    const v = parseFloat(document.getElementById('goal-inp').value);
-    if (!v || v < 30 || v > 200) { toast('请输入有效目标体重'); return; }
-    save(K.goal, v);
-    document.getElementById('goal-inp').value = '';
-    loadGoal();
-    toast('目标体重已设置：' + v.toFixed(1) + ' kg ');
-  }
-
-  function loadGoal() {
-    const g = load(K.goal);
-    if (typeof g === 'number') document.getElementById('goal-display').textContent = g.toFixed(1);
-  }
-
-  /* --- calendar --- */
-  function renderCalendar() {
-    const now = new Date(), year = now.getFullYear(), month = now.getMonth();
-    const firstDay = new Date(year,month,1).getDay();
-    const days = new Date(year,month+1,0).getDate();
-    const checkins = load(K.checkins), today = now.getDate();
-
-    const wd = document.getElementById('cal-wd');
-    wd.innerHTML = ['日','一','二','三','四','五','六'].map(d=>`<div class="cal-wd">${d}</div>`).join('');
-
-    const grid = document.getElementById('cal-grid');
-    let html = '<div></div>'.repeat(firstDay);
-    for (let d=1;d<=days;d++) {
-      const ds = year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-      const cls = checkins[ds] ? 'checked' : (d===today ? 'today' : '');
-      html += `<div class="cal-cell ${cls}">${d}</div>`;
+  function spawnFx(x,y,type,text,color){
+    const fx=$('fx');
+    const el=document.createElement('div');
+    if(type==='hit'){
+      el.className='hit-effect';
+      el.textContent=hitFx[Math.floor(Math.random()*hitFx.length)];
+      el.style.cssText=`left:${x}px;top:${y}px;color:${color};font-size:32px;`;
+    } else if(type==='crack'){
+      el.className='crack-text';
+      el.textContent=text||crackWords[Math.floor(Math.random()*crackWords.length)];
+      el.style.cssText=`left:${x}px;top:${y}px;color:${color};`;
+    } else if(type==='combo'){
+      el.className='combo-flash';
+      el.textContent=text;
+      el.style.cssText=`color:${color};text-shadow:0 0 30px ${color};`;
     }
-    grid.innerHTML = html;
+    fx.appendChild(el);
+    setTimeout(()=>el.remove(),800);
   }
 
-  /* --- weight chart --- */
-  function renderWeightChart() {
-    const w = load(K.weights), keys = Object.keys(w).sort().slice(-7);
-    const chart = document.getElementById('wchart');
-    if (!keys.length) return;
-    const vals = keys.map(k=>w[k]);
-    const mn = Math.min(...vals), mx = Math.max(...vals), range = mx-mn || 1;
-    chart.innerHTML = vals.map((v,i) => {
-      const h = Math.round(16 + ((v-mn)/range)*56);
-      const dateLabel = keys[i].slice(8);
-      return `<div class="wbar-wrap"><div class="wbar" style="height:${h}px"></div><div class="wbar-lbl">${dateLabel}日</div></div>`;
-    }).join('');
-    document.getElementById('wchart-range').textContent = keys[0].slice(5) + ' ~ ' + keys[keys.length-1].slice(5);
+  function addLog(text){
+    const log=$('log-area');
+    const line=document.createElement('div');
+    line.className='log-line new';
+    line.textContent='第'+round+'回合 · '+text;
+    log.prepend(line);
+    if(log.children.length>8) log.lastChild.remove();
   }
 
-  /* --- slogan history --- */
-  function renderSloganHistory() {
-    const data = load(K.slogans);
-    const keys = Object.keys(data).sort().reverse().slice(1,6);
-    const card = document.getElementById('slogan-history-card');
-    const list = document.getElementById('slogan-history');
-    if (!keys.length) { card.style.display='none'; return; }
-    card.style.display='block';
-    list.innerHTML = keys.map(k=>`
-    <div class="history-item">
-      <div class="history-date">${formatDate(k)}</div>
-      <div class="history-text">${data[k].text}</div>
-    </div>`).join('');
+  function doAttack(attacker,lineIdx){
+    if(busy)return;
+    busy=true;
+    const isMil=attacker==='mil';
+    const lines=isMil?milLines[lineIdx]:dilLines[lineIdx];
+    const text=lines[Math.floor(Math.random()*lines.length)];
+    const emotion=isMil?'💢':'💜';
+    showBubble(text,attacker,emotion);
+
+    const atk=$('mil-face');const def=$('dil-face');
+    const atkEl=isMil?atk:def; const defEl=isMil?def:atk;
+    atkEl.classList.add(isMil?'attack-right':'attack-left');
+    setTimeout(()=>{
+      defEl.classList.add('hit');
+      const dmg=Math.floor(Math.random()*15)+8;
+      if(isMil){dilHp=Math.max(0,dilHp-dmg);}else{milHp=Math.max(0,milHp-dmg);}
+      updateHp();
+      const defRect=defEl.getBoundingClientRect();
+      const arenaRect=$('arena').getBoundingClientRect();
+      const fx_x=defRect.left-arenaRect.left+defRect.width/2;
+      const fx_y=defRect.top-arenaRect.top;
+      spawnFx(fx_x,fx_y,'hit',null,isMil?'#ff6b35':'#a78bfa');
+      if(Math.random()>0.5) spawnFx(fx_x+30,fx_y+30,'crack',null,isMil?'#ff9a3c':'#c4b5fd');
+      if(attacker===lastAttacker){combo++;if(combo>=2)spawnFx(0,0,'combo',combo+'连击！',isMil?'#ff6b35':'#a78bfa');}
+      else{combo=0;}
+      lastAttacker=attacker;
+      addLog((isMil?'婆婆':'媳妇')+'出击 -'+dmg+' ('+text.slice(0,12)+'...)');
+      round++;
+      $('round-badge').textContent='第 '+round+' 回合';
+    },180);
+    setTimeout(()=>{
+      atkEl.classList.remove('attack-right','attack-left');
+      defEl.classList.remove('hit');
+      busy=false;
+      checkEnd();
+    },400);
   }
 
-  /* --- AI slogan --- */
-  function formatDate(str) {
-    return new Date(str).toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
+  function milAttack(i){doAttack('mil',i);}
+  function dilAttack(i){doAttack('dil',i);}
+
+  function charClick(who){
+    const el=$(who+'-face');
+    el.classList.add('shake');
+    setTimeout(()=>el.classList.remove('shake'),400);
+    spawnFx(who==='mil'?60:240,100,'hit',null,who==='mil'?'#ff6b35':'#a78bfa');
   }
 
-  /* ===================== 口号随机 ===================== */
-  function generateSlogan(force) {
-    const today = todayStr();
-    const data = load(K.slogans);
-
-    let random;
-    do {
-      random = LOCAL_SLOGANS[Math.floor(Math.random()*LOCAL_SLOGANS.length)];
-    } while (data[today]?.text === random);
-
-    data[today] = { text: random };
-    save(K.slogans, data);
-
-    showSlogan(random);
+  function checkEnd(){
+    if(dilHp<=0||milHp<=0){
+      const milWon=dilHp<=0;
+      $('result-title').textContent=milWon?'婆婆胜！👵':'媳妇赢了！👩';
+      $('result-title').style.color=milWon?'#ff6b35':'#a78bfa';
+      const endings=milWon?['媳妇耐心耗尽，选择以后少回婆家','媳妇决定修炼"左耳进右耳出"神功','媳妇默默掏出手机挂咸鱼...']:
+              ['婆婆败下阵来，三天内不敢发声','婆婆转移战场，去找邻居诉苦了','婆婆打电话给儿子：你媳妇欺负我！'];
+      $('result-msg').textContent=endings[Math.floor(Math.random()*endings.length)];
+      $('result').style.display='flex';
+    }
   }
 
-  function showSlogan(text) {
-    document.getElementById('slogan-content').innerText = text;
-  }
-  const mealNames = { breakfast:'早餐', lunch:'午餐', dinner:'晚餐' };
-
-  /* ===================== 食谱随机 ===================== */
-  function generateRecipe(meal) {
-      const list = LOCAL_RECIPES[meal];
-      const data = list[Math.floor(Math.random()*list.length)];
-
-      const card = document.getElementById('recipe-' + meal);
-
-      const tagsHtml = data.tags.map(t =>
-              `<span class="tag tag-g">${t}</span>`
-      ).join('');
-
-      card.innerHTML = `
-    <div class="recipe-top">
-      <div class="recipe-name">${data.name}</div>
-      <div class="recipe-kcal">${data.kcal}</div>
-    </div>
-    <div class="recipe-desc">${data.desc}</div>
-    <div class="tags">${tagsHtml}</div>
-    <button class="recipe-gen-btn" onclick="generateRecipe('${meal}', this)">
-      ✦ 再换一个
-    </button>
-  `;
+  function restart(){
+    milHp=100;dilHp=100;round=1;busy=false;combo=0;lastAttacker='';
+    updateHp();
+    $('round-badge').textContent='第 1 回合';
+    $('result').style.display='none';
+    $('log-area').innerHTML='';
+    showBubble('新的一局开始了，谁先动手？','mil','⚔️');
   }
 
-  /* --- init --- */
-  function init() {
-    const now = new Date();
-    document.getElementById('header-date').textContent = now.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
-    refreshCheckinUI();
-    loadTasks();
-    updateWeightHint();
-    loadGoal();
-    generateSlogan(false);
-  }
-
-  init();
+  updateHp();
 </script>
-</body>
-</html>
