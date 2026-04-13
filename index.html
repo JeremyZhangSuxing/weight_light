@@ -2,180 +2,346 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700;900&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
-  .arena{background:#1a0a0a;min-height:600px;border-radius:16px;overflow:hidden;position:relative;font-family:'Noto Sans SC',sans-serif;}
-  .bg-pattern{position:absolute;inset:0;opacity:0.04;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px;}
-  .title-bar{text-align:center;padding:14px 12px 10px;position:relative;z-index:2;}
-  .title-main{font-family:'Ma Shan Zheng',cursive;font-size:26px;color:#ff6b35;letter-spacing:4px;text-shadow:0 0 20px rgba(255,107,53,0.5);}
-  .title-sub{font-size:11px;color:#888;letter-spacing:2px;margin-top:2px;}
-  .hp-bar-row{display:flex;gap:10px;padding:0 12px 10px;position:relative;z-index:2;}
+
+  .arena{background:#1a0a0a;border-radius:16px;overflow:hidden;position:relative;font-family:'Noto Sans SC',sans-serif;}
+  .bg-pattern{position:absolute;inset:0;opacity:0.04;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px;pointer-events:none;}
+  .effect-layer{position:absolute;inset:0;pointer-events:none;z-index:10;overflow:hidden;}
+
+  /* SETUP SCREEN */
+  .setup-screen{padding:20px 16px;position:relative;z-index:2;}
+  .setup-title{font-family:'Ma Shan Zheng',cursive;font-size:26px;color:#ff6b35;text-align:center;letter-spacing:4px;margin-bottom:4px;}
+  .setup-sub{font-size:11px;color:#666;text-align:center;letter-spacing:2px;margin-bottom:20px;}
+  .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .setup-card{background:#0d0505;border:1px solid #2a1005;border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .setup-card.dil-card{background:#0a0515;border-color:#1a0d2e;}
+  .avatar-preview{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;cursor:pointer;transition:transform 0.15s;position:relative;border:3px solid #ff6b35;}
+  .avatar-preview.dil-av{border-color:#a78bfa;}
+  .avatar-preview:active{transform:scale(0.93);}
+  .av-change-hint{position:absolute;bottom:-2px;right:-2px;background:#333;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #1a0a0a;}
+  .setup-label{font-size:11px;letter-spacing:1px;font-weight:700;}
+  .setup-label.mil{color:#ff9a3c;}
+  .setup-label.dil{color:#a78bfa;}
+  .name-input{width:100%;background:#1a0a0a;border:1px solid #333;border-radius:8px;padding:7px 10px;color:#fff;font-size:13px;text-align:center;font-family:'Noto Sans SC',sans-serif;outline:none;}
+  .name-input.dil{background:#12091f;border-color:#3b2060;}
+  .name-input:focus{border-color:#ff6b35;}
+  .name-input.dil:focus{border-color:#a78bfa;}
+  .emoji-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;}
+  .ep-btn{background:#1a0a0a;border:1px solid #2a1005;border-radius:6px;font-size:18px;padding:5px 2px;cursor:pointer;transition:all 0.1s;text-align:center;}
+  .ep-btn.dil-ep{background:#12091f;border-color:#1a0d2e;}
+  .ep-btn.selected{border-color:#ff6b35;background:#2a1005;}
+  .ep-btn.dil-ep.selected{border-color:#a78bfa;background:#1a0d2e;}
+  .ep-btn:active{transform:scale(0.88);}
+  .start-btn{width:100%;margin-top:16px;padding:14px;background:linear-gradient(90deg,#cc4400,#ff6b35);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Ma Shan Zheng',cursive;letter-spacing:3px;transition:transform 0.15s;}
+  .start-btn:active{transform:scale(0.96);}
+  .upload-btn{font-size:11px;color:#555;background:none;border:1px dashed #333;border-radius:6px;padding:4px 8px;cursor:pointer;width:100%;margin-top:-4px;}
+  .upload-btn:hover{color:#888;border-color:#555;}
+  .file-inp{display:none;}
+
+  /* BATTLE SCREEN */
+  .battle-screen{display:none;position:relative;z-index:2;}
+  .title-bar{text-align:center;padding:12px 12px 8px;}
+  .title-main{font-family:'Ma Shan Zheng',cursive;font-size:24px;color:#ff6b35;letter-spacing:4px;}
+  .title-sub{font-size:10px;color:#666;letter-spacing:2px;margin-top:1px;}
+
+  .hp-bar-row{display:flex;gap:10px;padding:0 12px 8px;}
   .hp-wrap{flex:1;}
-  .hp-name{font-size:11px;font-weight:700;margin-bottom:4px;letter-spacing:1px;}
-  .hp-name.mil{color:#ff6b35;text-align:left;}
+  .hp-name{font-size:11px;font-weight:700;margin-bottom:3px;letter-spacing:1px;}
+  .hp-name.mil{color:#ff6b35;}
   .hp-name.dil{color:#a78bfa;text-align:right;}
-  .hp-bar{height:10px;border-radius:5px;background:#333;overflow:hidden;position:relative;}
-  .hp-fill{height:100%;border-radius:5px;transition:width 0.4s cubic-bezier(.34,1.56,.64,1);}
+  .hp-bar{height:8px;border-radius:4px;background:#333;overflow:hidden;}
+  .hp-fill{height:100%;border-radius:4px;transition:width 0.4s cubic-bezier(.34,1.56,.64,1);}
   .hp-fill.mil{background:linear-gradient(90deg,#ff6b35,#ff9a3c);}
   .hp-fill.dil{background:linear-gradient(90deg,#a78bfa,#c4b5fd);float:right;}
-  .hp-num{font-size:10px;color:#666;margin-top:2px;}
-  .hp-num.mil{text-align:left;}
+  .hp-num{font-size:10px;color:#555;margin-top:2px;}
   .hp-num.dil{text-align:right;}
-  .stage{display:flex;align-items:flex-end;justify-content:space-between;padding:0 16px 0;position:relative;z-index:2;min-height:200px;}
-  .char-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;}
-  .char-face{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:50px;position:relative;transition:transform 0.15s;cursor:pointer;user-select:none;border:3px solid transparent;}
-  .char-face.mil{background:radial-gradient(circle at 40% 35%,#ff9a3c,#cc4400);border-color:#ff6b35;box-shadow:0 0 20px rgba(255,107,53,0.4);}
-  .char-face.dil{background:radial-gradient(circle at 40% 35%,#c4b5fd,#7c3aed);border-color:#a78bfa;box-shadow:0 0 20px rgba(167,139,250,0.4);}
-  .char-face:active{transform:scale(0.92);}
+
+  .stage{display:flex;align-items:flex-end;justify-content:space-between;padding:0 12px 0;min-height:160px;}
+  .char-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .char-face{width:86px;height:86px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:46px;cursor:pointer;user-select:none;border:3px solid #ff6b35;transition:transform 0.15s;overflow:hidden;background:#2a1005;}
+  .char-face.dil-face{border-color:#a78bfa;background:#1a0d2e;}
+  .char-face img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
   .char-face.shake{animation:shake 0.4s ease;}
-  .char-face.attack-right{animation:atk-r 0.35s ease;}
-  .char-face.attack-left{animation:atk-l 0.35s ease;}
-  .char-face.hit{animation:hit-flash 0.3s ease;}
-  .char-name{font-size:13px;font-weight:700;letter-spacing:1px;}
-  .char-name.mil{color:#ff6b35;}
-  .char-name.dil{color:#a78bfa;}
-  .char-title{font-size:10px;color:#666;letter-spacing:1px;}
-  .char-status{font-size:18px;margin-top:2px;min-height:24px;}
-  .vs-center{display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:20px;}
-  .vs-text{font-family:'Ma Shan Zheng',cursive;font-size:30px;color:#ff6b35;text-shadow:0 0 15px rgba(255,107,53,0.6);}
-  .round-badge{background:#2a1a0a;border:1px solid #ff6b35;border-radius:20px;padding:2px 10px;font-size:11px;color:#ff9a3c;}
-  .bubble-zone{min-height:80px;padding:8px 14px;position:relative;z-index:2;}
-  .bubble{border-radius:12px;padding:10px 14px;max-width:75%;font-size:13px;line-height:1.5;position:relative;animation:pop-in 0.3s cubic-bezier(.34,1.56,.64,1);}
-  .bubble.mil{background:#2a1005;border:1px solid #ff6b35;color:#ffcca0;border-radius:12px 12px 12px 2px;margin-left:0;}
+  .char-face.atk-r{animation:atk-r 0.35s ease;}
+  .char-face.atk-l{animation:atk-l 0.35s ease;}
+  .char-face.hit-flash{animation:hit-f 0.3s ease;}
+  .char-name-b{font-size:12px;font-weight:700;letter-spacing:1px;}
+  .char-name-b.mil{color:#ff6b35;}
+  .char-name-b.dil{color:#a78bfa;}
+  .char-status{font-size:16px;min-height:22px;}
+  .vs-center{display:flex;flex-direction:column;align-items:center;gap:4px;padding-bottom:18px;}
+  .vs-text{font-family:'Ma Shan Zheng',cursive;font-size:28px;color:#ff6b35;}
+  .round-badge{background:#1a0800;border:1px solid #ff6b35;border-radius:20px;padding:2px 10px;font-size:10px;color:#ff9a3c;}
+
+  .bubble-zone{min-height:72px;padding:6px 12px;}
+  .bubble{border-radius:12px;padding:9px 13px;max-width:80%;font-size:12px;line-height:1.55;position:relative;animation:pop-in 0.28s cubic-bezier(.34,1.56,.64,1);}
+  .bubble.mil{background:#2a1005;border:1px solid #ff6b35;color:#ffcca0;border-radius:12px 12px 12px 2px;}
   .bubble.dil{background:#1a0d2e;border:1px solid #a78bfa;color:#ddd6fe;border-radius:12px 12px 2px 12px;margin-left:auto;}
-  .bubble::after{content:attr(data-emotion);position:absolute;top:-10px;right:8px;font-size:16px;}
-  .action-bar{padding:8px 12px;position:relative;z-index:2;}
-  .action-label{font-size:10px;color:#555;letter-spacing:2px;margin-bottom:6px;}
-  .btn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
-  .btn-grid.dil-btns{margin-top:6px;}
-  .atk-btn{padding:9px 8px;border-radius:10px;border:1px solid;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;position:relative;overflow:hidden;}
-  .atk-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.1);opacity:0;transition:opacity 0.15s;}
-  .atk-btn:hover::before{opacity:1;}
-  .atk-btn:active{transform:scale(0.95);}
-  .atk-btn.mil-btn{background:#1a0800;border-color:#cc4400;color:#ff9a3c;}
-  .atk-btn.dil-btn{background:#0d0520;border-color:#7c3aed;color:#c4b5fd;}
-  .btn-divider{text-align:center;font-size:10px;color:#444;letter-spacing:2px;margin:6px 0 4px;}
-  .effect-layer{position:absolute;inset:0;pointer-events:none;z-index:10;overflow:hidden;}
-  .hit-effect{position:absolute;font-size:28px;font-weight:900;pointer-events:none;animation:fly-up 0.7s ease forwards;}
-  .crack-text{position:absolute;font-family:'Ma Shan Zheng',cursive;font-size:22px;pointer-events:none;animation:crack-anim 0.8s ease forwards;}
-  .combo-flash{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Ma Shan Zheng',cursive;font-size:48px;pointer-events:none;animation:combo-anim 0.6s ease forwards;white-space:nowrap;}
-  .log-area{padding:6px 14px 10px;max-height:80px;overflow-y:auto;scrollbar-width:none;}
+  .bubble::after{content:attr(data-e);position:absolute;top:-9px;right:7px;font-size:14px;}
+
+  .action-bar{padding:6px 12px 10px;}
+  .action-label{font-size:10px;color:#444;letter-spacing:2px;margin-bottom:5px;}
+  .btn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;}
+  .atk-btn{padding:8px 6px;border-radius:9px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;position:relative;overflow:hidden;}
+  .atk-btn:active{transform:scale(0.93);}
+  .atk-btn.mb{background:#1a0800;border-color:#cc4400;color:#ff9a3c;}
+  .atk-btn.db{background:#0d0520;border-color:#7c3aed;color:#c4b5fd;}
+  .btn-div{text-align:center;font-size:10px;color:#333;letter-spacing:2px;margin:5px 0 4px;}
+
+  .log-area{padding:4px 12px 8px;max-height:60px;overflow-y:auto;scrollbar-width:none;}
   .log-area::-webkit-scrollbar{display:none;}
-  .log-line{font-size:11px;color:#555;line-height:1.6;border-left:2px solid #222;padding-left:6px;margin-bottom:2px;}
-  .log-line.new{color:#888;border-left-color:#444;}
-  .result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;border-radius:16px;}
-  .result-title{font-family:'Ma Shan Zheng',cursive;font-size:48px;margin-bottom:12px;animation:result-pop 0.5s cubic-bezier(.34,1.56,.64,1);}
-  .result-msg{font-size:16px;color:#aaa;margin-bottom:20px;text-align:center;line-height:1.6;}
-  .restart-btn{background:#ff6b35;color:#fff;border:none;padding:12px 32px;border-radius:25px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:2px;transition:transform 0.15s;}
-  .restart-btn:active{transform:scale(0.95);}
-  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
-  @keyframes atk-r{0%{transform:translateX(0);}40%{transform:translateX(30px) scale(1.1);}100%{transform:translateX(0);}}
-  @keyframes atk-l{0%{transform:translateX(0);}40%{transform:translateX(-30px) scale(1.1);}100%{transform:translateX(0);}}
-  @keyframes hit-flash{0%{filter:brightness(1);}30%{filter:brightness(3);}60%{filter:brightness(0.5);}100%{filter:brightness(1);}}
-  @keyframes fly-up{0%{opacity:1;transform:translate(-50%,-50%) scale(0.5);}60%{opacity:1;transform:translate(-50%,-120%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-180%) scale(0.8);}}
-  @keyframes crack-anim{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3) rotate(-10deg);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(5deg);}100%{opacity:0;transform:translate(-50%,-80%) scale(0.9) rotate(-3deg);}}
-  @keyframes combo-anim{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1);}}
+  .log-line{font-size:11px;color:#444;line-height:1.6;border-left:2px solid #1f1f1f;padding-left:6px;margin-bottom:1px;}
+
+  .hit-effect{position:absolute;font-size:26px;font-weight:900;pointer-events:none;animation:fly-up 0.65s ease forwards;}
+  .crack-text{position:absolute;font-family:'Ma Shan Zheng',cursive;font-size:20px;pointer-events:none;animation:crack-anim 0.75s ease forwards;}
+  .combo-flash{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Ma Shan Zheng',cursive;font-size:42px;pointer-events:none;animation:combo-anim 0.6s ease forwards;white-space:nowrap;}
+
+  .result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;border-radius:16px;}
+  .result-title{font-family:'Ma Shan Zheng',cursive;font-size:44px;margin-bottom:10px;animation:result-pop 0.5s cubic-bezier(.34,1.56,.64,1);}
+  .result-msg{font-size:14px;color:#999;margin-bottom:20px;text-align:center;line-height:1.7;padding:0 20px;}
+  .result-btns{display:flex;gap:10px;}
+  .result-btn{padding:11px 24px;border-radius:24px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:2px;border:none;transition:transform 0.15s;}
+  .result-btn:active{transform:scale(0.95);}
+  .rbtn-again{background:#ff6b35;color:#fff;}
+  .rbtn-setup{background:#2a2a2a;color:#aaa;}
+
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+  @keyframes atk-r{0%{transform:translateX(0);}40%{transform:translateX(28px) scale(1.1);}100%{transform:translateX(0);}}
+  @keyframes atk-l{0%{transform:translateX(0);}40%{transform:translateX(-28px) scale(1.1);}100%{transform:translateX(0);}}
+  @keyframes hit-f{0%{filter:brightness(1);}30%{filter:brightness(3);}60%{filter:brightness(0.4);}100%{filter:brightness(1);}}
+  @keyframes fly-up{0%{opacity:1;transform:translate(-50%,-50%) scale(0.5);}60%{opacity:1;transform:translate(-50%,-130%) scale(1.2);}100%{opacity:0;transform:translate(-50%,-190%) scale(0.8);}}
+  @keyframes crack-anim{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3) rotate(-10deg);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg);}100%{opacity:0;transform:translate(-50%,-80%) scale(0.9);}}
+  @keyframes combo-anim{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3);}40%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}70%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;}}
   @keyframes pop-in{0%{opacity:0;transform:scale(0.7);}100%{opacity:1;transform:scale(1);}}
   @keyframes result-pop{0%{transform:scale(0.3);opacity:0;}100%{transform:scale(1);opacity:1;}}
-  @keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(255,107,53,0.4);}50%{box-shadow:0 0 40px rgba(255,107,53,0.8);}}
 </style>
 
-<h2 class="sr-only">婆媳修罗场互动游戏，点击按钮让婆婆和媳妇互怼</h2>
+<h2 class="sr-only">婆媳修罗场互动游戏，支持自定义头像和名字</h2>
 <div class="arena" id="arena">
   <div class="bg-pattern"></div>
   <div class="effect-layer" id="fx"></div>
 
-  <div class="title-bar">
-    <div class="title-main">婆媳修罗场</div>
-    <div class="title-sub">◆ 家庭战争模拟器 · 年度终极对决 ◆</div>
+  <!-- SETUP -->
+  <div class="setup-screen" id="setup-screen">
+    <div class="setup-title">婆媳修罗场</div>
+    <div class="setup-sub">◆ 自定义双方角色，开战！◆</div>
+    <div class="setup-grid">
+      <!-- MIL side -->
+      <div class="setup-card">
+        <div class="setup-label mil">婆婆</div>
+        <div class="avatar-preview" id="mil-av-preview" onclick="cycleEmoji('mil')">
+          <span id="mil-av-emoji" style="font-size:44px">👵</span>
+          <div class="av-change-hint">✏️</div>
+        </div>
+        <button class="upload-btn" onclick="document.getElementById('mil-file').click()">上传照片</button>
+        <input class="file-inp" type="file" id="mil-file" accept="image/*" onchange="uploadPhoto('mil',this)">
+        <input class="name-input" id="mil-name" value="王秀珍" maxlength="6" placeholder="婆婆名字">
+        <div class="emoji-picker" id="mil-ep"></div>
+      </div>
+      <!-- DIL side -->
+      <div class="setup-card dil-card">
+        <div class="setup-label dil">媳妇</div>
+        <div class="avatar-preview dil-av" id="dil-av-preview" onclick="cycleEmoji('dil')">
+          <span id="dil-av-emoji" style="font-size:44px">👩</span>
+          <div class="av-change-hint">✏️</div>
+        </div>
+        <button class="upload-btn" onclick="document.getElementById('dil-file').click()">上传照片</button>
+        <input class="file-inp" type="file" id="dil-file" accept="image/*" onchange="uploadPhoto('dil',this)">
+        <input class="name-input dil" id="dil-name" value="林小美" maxlength="6" placeholder="媳妇名字">
+        <div class="emoji-picker" id="dil-ep"></div>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startBattle()">开战！⚔️</button>
   </div>
 
-  <div class="hp-bar-row">
-    <div class="hp-wrap">
-      <div class="hp-name mil">婆婆 怒气值</div>
-      <div class="hp-bar"><div class="hp-fill mil" id="mil-hp" style="width:100%"></div></div>
-      <div class="hp-num mil" id="mil-hp-num">100 / 100</div>
+  <!-- BATTLE -->
+  <div class="battle-screen" id="battle-screen">
+    <div class="title-bar">
+      <div class="title-main">婆媳修罗场</div>
+      <div class="title-sub">◆ 家庭战争模拟器 ◆</div>
     </div>
-    <div class="hp-wrap">
-      <div class="hp-name dil" style="text-align:right">媳妇 耐心值</div>
-      <div class="hp-bar"><div class="hp-fill dil" id="dil-hp" style="width:100%"></div></div>
-      <div class="hp-num dil" id="dil-hp-num">100 / 100</div>
+    <div class="hp-bar-row">
+      <div class="hp-wrap">
+        <div class="hp-name mil" id="b-mil-name">婆婆 怒气值</div>
+        <div class="hp-bar"><div class="hp-fill mil" id="mil-hp" style="width:100%"></div></div>
+        <div class="hp-num" id="mil-hp-num">100 / 100</div>
+      </div>
+      <div class="hp-wrap">
+        <div class="hp-name dil" id="b-dil-name">媳妇 耐心值</div>
+        <div class="hp-bar"><div class="hp-fill dil" id="dil-hp" style="width:100%"></div></div>
+        <div class="hp-num dil" id="dil-hp-num">100 / 100</div>
+      </div>
     </div>
-  </div>
-
-  <div class="stage">
-    <div class="char-wrap">
-      <div class="char-face mil" id="mil-face" onclick="charClick('mil')">👵</div>
-      <div class="char-name mil">王秀珍</div>
-      <div class="char-title" style="color:#ff9a3c55">婆婆 · 战斗力 MAX</div>
-      <div class="char-status" id="mil-status">😤</div>
+    <div class="stage">
+      <div class="char-wrap">
+        <div class="char-face" id="mil-face" onclick="charClick('mil')"><span id="mil-face-inner" style="font-size:46px">👵</span></div>
+        <div class="char-name-b mil" id="b-mil-nm">王秀珍</div>
+        <div class="char-status" id="mil-st">😤</div>
+      </div>
+      <div class="vs-center">
+        <div class="vs-text">VS</div>
+        <div class="round-badge" id="round-badge">第 1 回合</div>
+      </div>
+      <div class="char-wrap">
+        <div class="char-face dil-face" id="dil-face" onclick="charClick('dil')"><span id="dil-face-inner" style="font-size:46px">👩</span></div>
+        <div class="char-name-b dil" id="b-dil-nm">林小美</div>
+        <div class="char-status" id="dil-st">😑</div>
+      </div>
     </div>
-    <div class="vs-center">
-      <div class="vs-text">VS</div>
-      <div class="round-badge" id="round-badge">第 1 回合</div>
+    <div class="bubble-zone" id="bubble-zone">
+      <div class="bubble mil" data-e="💢" style="font-size:12px">我儿子娶你之前，白白净净的！</div>
     </div>
-    <div class="char-wrap">
-      <div class="char-face dil" id="dil-face" onclick="charClick('dil')">👩</div>
-      <div class="char-name dil">林小美</div>
-      <div class="char-title" style="color:#a78bfa55">媳妇 · 忍耐极限</div>
-      <div class="char-status" id="dil-status">😑</div>
+    <div class="action-bar">
+      <div class="action-label" id="mil-label">— 婆婆出招 —</div>
+      <div class="btn-grid">
+        <button class="atk-btn mb" onclick="milAttack(0)">👶 催生大法</button>
+        <button class="atk-btn mb" onclick="milAttack(1)">🍳 嫌弃厨艺</button>
+        <button class="atk-btn mb" onclick="milAttack(2)">💸 哭穷要钱</button>
+        <button class="atk-btn mb" onclick="milAttack(3)">📺 比较前任</button>
+      </div>
+      <div class="btn-div" id="dil-label">— 媳妇反击 —</div>
+      <div class="btn-grid">
+        <button class="atk-btn db" onclick="dilAttack(0)">🔥 正面怼回</button>
+        <button class="atk-btn db" onclick="dilAttack(1)">😤 翻旧账</button>
+        <button class="atk-btn db" onclick="dilAttack(2)">📱 找老公评理</button>
+        <button class="atk-btn db" onclick="dilAttack(3)">🧳 威胁离婚</button>
+      </div>
     </div>
-  </div>
-
-  <div class="bubble-zone" id="bubble-zone">
-    <div class="bubble mil" data-emotion="💢">我儿子娶你之前，白白净净的，现在瞧瞧，一顿饭能吃三碗！</div>
-  </div>
-
-  <div class="action-bar">
-    <div class="action-label">— 婆婆出招 —</div>
-    <div class="btn-grid">
-      <button class="atk-btn mil-btn" onclick="milAttack(0)">👶 催生大法</button>
-      <button class="atk-btn mil-btn" onclick="milAttack(1)">🍳 嫌弃厨艺</button>
-      <button class="atk-btn mil-btn" onclick="milAttack(2)">💸 哭穷要钱</button>
-      <button class="atk-btn mil-btn" onclick="milAttack(3)">📺 前女友比较</button>
+    <div class="log-area" id="log-area"></div>
+    <div class="result-overlay" id="result" style="display:none">
+      <div class="result-title" id="result-title">婆婆赢了！</div>
+      <div class="result-msg" id="result-msg"></div>
+      <div class="result-btns">
+        <button class="result-btn rbtn-again" onclick="restart()">再来一局</button>
+        <button class="result-btn rbtn-setup" onclick="goSetup()">换角色</button>
+      </div>
     </div>
-    <div class="btn-divider">— 媳妇反击 —</div>
-    <div class="btn-grid dil-btns">
-      <button class="atk-btn dil-btn" onclick="dilAttack(0)">🔥 怼回去</button>
-      <button class="atk-btn dil-btn" onclick="dilAttack(1)">😤 翻旧账</button>
-      <button class="atk-btn dil-btn" onclick="dilAttack(2)">📱 找老公评理</button>
-      <button class="atk-btn dil-btn" onclick="dilAttack(3)">🧳 威胁离婚</button>
-    </div>
-  </div>
-
-  <div class="log-area" id="log-area"></div>
-
-  <div class="result-overlay" id="result" style="display:none">
-    <div class="result-title" id="result-title" style="color:#ff6b35">婆婆赢了！</div>
-    <div class="result-msg" id="result-msg">媳妇耐心耗尽，选择沉默是金</div>
-    <button class="restart-btn" onclick="restart()">再来一局 🔄</button>
   </div>
 </div>
 
 <script>
-  const milLines = [
-    ["都这个岁数了还不要孩子，你是不是有问题啊？","我就说嘛，你们年轻人啊，自私！","趁年轻生，老了生不了哭去吧！","我儿子等不起啊，你知道吗！"],
-    ["你这菜做的什么玩意儿？放那么多盐！","我儿子从小吃我做的菜，哪受过这委屈","连个饭都做不好，还指望干啥？","我给你看看什么叫真正的家常菜！"],
+  const MIL_EMOJIS=['👵','👩‍🦳','🧓','👩‍🦱','🫅','🧙‍♀️','👸','🤦‍♀️','😤','🫠'];
+  const DIL_EMOJIS=['👩','👩‍🦰','💁‍♀️','🙋‍♀️','😅','🤷‍♀️','💅','🧏‍♀️','😒','🫡'];
+
+  const milLines=[
+    ["都这个岁数了还不要孩子，你是不是有问题啊？","趁年轻生，老了生不了哭去吧！","我儿子等不起，你到底打算怎样？","不生孩子算什么媳妇！我们老王家要断后了！"],
+    ["你这菜做的什么玩意儿？放那么多盐！","我儿子从小吃我做的菜，哪受过这委屈","连个饭都做不好，还指望干啥？","你看看你做的，猪食都比这强！"],
     ["你们挣那么多钱，就不知道孝敬孝敬我们？","我生儿子养儿子，到头来落这下场？","你妈那边肯定没少拿吧，我们就啥都没有？","钱进了你口袋就是你的了，是不是！"],
-    ["他前女友多懂事啊，人家妈妈我都认识","人家不像你，眼睛长头顶上","早知道就让他们在一起了，多好","你哪里比得上人家呢，就说说嘛"]
+    ["他前女友多懂事啊，人家妈妈我都认识","人家不像你，眼睛长头顶上","早知道就让他们在一起了，多好","就你这样的，也配我儿子？"]
   ];
-  const dilLines = [
-    ["您催我不如催您儿子，造孩子要两个人的！","生不生是我的身体我的权利，您管得着吗？","您要是那么想要孙子，自己再生一个啊！","催催催，您催孩子读书这么上心就好了！"],
-    ["我做饭是一般，可您儿子也没嫌弃过啊？","您天天指点，要不您来做，我洗碗行了吧？","每个人口味不同，您没听说过吗？","您要觉得我做得不好，大可以自己动手！"],
-    ["我们挣的钱贴补家用已经够多了，有账吗？","您儿子的钱也是我们共同挣的，凭什么只算我的？","这话说的，好像我欠您几百万一样！","孝顺是心意，不是交换，您搞清楚！"],
-    ["那您当初怎么不让他们在一起呢？","喜欢她你去找她啊，我又没拦着！","比来比去，您儿子是二手市场的货吗？","这辈子我都不嫁人了，省得天天被比较！"]
+  const dilLines=[
+    ["您催我不如催您儿子，造孩子要两个人！","生不生是我的权利，您管得着吗？","您要那么想要孙子，自己再生一个啊！","催催催，您催孩子读书这么上心就好了！"],
+    ["我做饭是一般，可您儿子没嫌弃过啊？","您天天指点，要不您来做，我洗碗！","每个人口味不同，您没听说过吗？","您觉得不好，大可以自己动手做！"],
+    ["我们贴补家用已经够多了！","您儿子的钱也是我们共同挣的！","这话说的，好像我欠您几百万一样！","孝顺是心意不是交换，您搞清楚！"],
+    ["那您当初怎么不让他们在一起呢？","喜欢她你去找她啊，我没拦着！","比来比去，您儿子是二手市场的货吗？","这辈子我都不嫁人了，省得被比较！"]
   ];
-  const hitFx = ["💥","👊","⚡","💢","🔥","💫","✨","😱"];
-  const crackWords = ["绝了！","实名diss！","致命一击！","破防了！","狠话！","太真实了！","话糙理不糙！","我emo了"];
-  let milHp=100,dilHp=100,round=1,busy=false,combo=0,lastAttacker='';
+  const hitFx=["💥","👊","⚡","💢","🔥","💫","✨","😱"];
+  const crackWords=["绝了！","实名diss！","致命一击！","破防了！","狠话！","太真实了！","话糙理不糙！","我emo了"];
+
+  let milHp=100,dilHp=100,round=1,busy=false,combo=0,lastAtk='';
+  let milEmojiIdx=0,dilEmojiIdx=0;
+  let milPhotoUrl=null,dilPhotoUrl=null;
 
   function $(id){return document.getElementById(id);}
+
+  function buildEmojiPicker(side){
+    const emojis=side==='mil'?MIL_EMOJIS:DIL_EMOJIS;
+    const ep=$(side+'-ep');
+    ep.innerHTML='';
+    emojis.forEach((e,i)=>{
+      const btn=document.createElement('button');
+      btn.className='ep-btn'+(side==='dil'?' dil-ep':'');
+      btn.textContent=e;
+      btn.onclick=()=>selectEmoji(side,i);
+      if(i===(side==='mil'?milEmojiIdx:dilEmojiIdx)) btn.classList.add('selected');
+      ep.appendChild(btn);
+    });
+  }
+
+  function selectEmoji(side,idx){
+    if(side==='mil'){milEmojiIdx=idx;milPhotoUrl=null;}
+    else{dilEmojiIdx=idx;dilPhotoUrl=null;}
+    updatePreview(side);
+    buildEmojiPicker(side);
+  }
+
+  function cycleEmoji(side){
+    if(side==='mil'){milEmojiIdx=(milEmojiIdx+1)%MIL_EMOJIS.length;milPhotoUrl=null;}
+    else{dilEmojiIdx=(dilEmojiIdx+1)%DIL_EMOJIS.length;dilPhotoUrl=null;}
+    updatePreview(side);
+    buildEmojiPicker(side);
+  }
+
+  function updatePreview(side){
+    const isMil=side==='mil';
+    const photoUrl=isMil?milPhotoUrl:dilPhotoUrl;
+    const emoji=(isMil?MIL_EMOJIS:DIL_EMOJIS)[isMil?milEmojiIdx:dilEmojiIdx];
+    const prev=$(side+'-av-preview');
+    const espan=$(side+'-av-emoji');
+    if(photoUrl){
+      prev.innerHTML=`<img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"><div class="av-change-hint" style="position:absolute;bottom:-2px;right:-2px;background:#333;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #1a0a0a;">✏️</div>`;
+    } else {
+      prev.innerHTML=`<span id="${side}-av-emoji" style="font-size:44px">${emoji}</span><div class="av-change-hint" style="position:absolute;bottom:-2px;right:-2px;background:#333;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #1a0a0a;">✏️</div>`;
+    }
+  }
+
+  function uploadPhoto(side,input){
+    const file=input.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      if(side==='mil')milPhotoUrl=e.target.result;
+      else dilPhotoUrl=e.target.result;
+      updatePreview(side);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function setFaceInBattle(side){
+    const isMil=side==='mil';
+    const photoUrl=isMil?milPhotoUrl:dilPhotoUrl;
+    const emoji=(isMil?MIL_EMOJIS:DIL_EMOJIS)[isMil?milEmojiIdx:dilEmojiIdx];
+    const faceEl=$(side+'-face');
+    if(photoUrl){
+      faceEl.innerHTML=`<img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      faceEl.innerHTML=`<span id="${side}-face-inner" style="font-size:46px">${emoji}</span>`;
+    }
+  }
+
+  function startBattle(){
+    const milName=$('mil-name').value||'婆婆';
+    const dilName=$('dil-name').value||'媳妇';
+    $('b-mil-name').textContent=milName+' 怒气值';
+    $('b-dil-name').textContent=dilName+' 耐心值';
+    $('b-mil-nm').textContent=milName;
+    $('b-dil-nm').textContent=dilName;
+    $('mil-label').textContent='— '+milName+' 出招 —';
+    $('dil-label').textContent='— '+dilName+' 反击 —';
+    setFaceInBattle('mil');
+    setFaceInBattle('dil');
+    milHp=100;dilHp=100;round=1;busy=false;combo=0;lastAtk='';
+    updateHp();
+    $('round-badge').textContent='第 1 回合';
+    $('log-area').innerHTML='';
+    $('result').style.display='none';
+    showBubble('开战！谁先出招？','mil','⚔️');
+    $('setup-screen').style.display='none';
+    $('battle-screen').style.display='block';
+  }
+
+  function goSetup(){
+    $('result').style.display='none';
+    $('battle-screen').style.display='none';
+    $('setup-screen').style.display='block';
+  }
 
   function updateHp(){
     $('mil-hp').style.width=milHp+'%';
     $('dil-hp').style.width=dilHp+'%';
     $('mil-hp-num').textContent=milHp+' / 100';
     $('dil-hp-num').textContent=dilHp+' / 100';
-    $('mil-status').textContent=milHp>66?'😤':milHp>33?'😡':'🤯';
-    $('dil-status').textContent=dilHp>66?'😑':dilHp>33?'😠':'😭';
+    $('mil-st').textContent=milHp>66?'😤':milHp>33?'😡':'🤯';
+    $('dil-st').textContent=dilHp>66?'😑':dilHp>33?'😠':'😭';
   }
 
   function showBubble(text,side,emotion){
@@ -183,7 +349,7 @@
     const b=document.createElement('div');
     b.className='bubble '+side;
     b.textContent=text;
-    b.setAttribute('data-emotion',emotion||'');
+    b.setAttribute('data-e',emotion||'');
     zone.innerHTML='';
     zone.appendChild(b);
   }
@@ -194,7 +360,7 @@
     if(type==='hit'){
       el.className='hit-effect';
       el.textContent=hitFx[Math.floor(Math.random()*hitFx.length)];
-      el.style.cssText=`left:${x}px;top:${y}px;color:${color};font-size:32px;`;
+      el.style.cssText=`left:${x}px;top:${y}px;color:${color};font-size:28px;`;
     } else if(type==='crack'){
       el.className='crack-text';
       el.textContent=text||crackWords[Math.floor(Math.random()*crackWords.length)];
@@ -202,7 +368,7 @@
     } else if(type==='combo'){
       el.className='combo-flash';
       el.textContent=text;
-      el.style.cssText=`color:${color};text-shadow:0 0 30px ${color};`;
+      el.style.cssText=`color:${color};text-shadow:0 0 25px ${color};`;
     }
     fx.appendChild(el);
     setTimeout(()=>el.remove(),800);
@@ -211,10 +377,10 @@
   function addLog(text){
     const log=$('log-area');
     const line=document.createElement('div');
-    line.className='log-line new';
-    line.textContent='第'+round+'回合 · '+text;
+    line.className='log-line';
+    line.textContent='R'+round+' · '+text;
     log.prepend(line);
-    if(log.children.length>8) log.lastChild.remove();
+    if(log.children.length>6)log.lastChild.remove();
   }
 
   function doAttack(attacker,lineIdx){
@@ -223,35 +389,30 @@
     const isMil=attacker==='mil';
     const lines=isMil?milLines[lineIdx]:dilLines[lineIdx];
     const text=lines[Math.floor(Math.random()*lines.length)];
-    const emotion=isMil?'💢':'💜';
-    showBubble(text,attacker,emotion);
-
-    const atk=$('mil-face');const def=$('dil-face');
-    const atkEl=isMil?atk:def; const defEl=isMil?def:atk;
-    atkEl.classList.add(isMil?'attack-right':'attack-left');
+    showBubble(text,attacker,isMil?'💢':'💜');
+    const atkEl=$(isMil?'mil-face':'dil-face');
+    const defEl=$(isMil?'dil-face':'mil-face');
+    atkEl.classList.add(isMil?'atk-r':'atk-l');
     setTimeout(()=>{
-      defEl.classList.add('hit');
+      defEl.classList.add('hit-flash');
       const dmg=Math.floor(Math.random()*15)+8;
-      if(isMil){dilHp=Math.max(0,dilHp-dmg);}else{milHp=Math.max(0,milHp-dmg);}
+      if(isMil)dilHp=Math.max(0,dilHp-dmg);else milHp=Math.max(0,milHp-dmg);
       updateHp();
-      const defRect=defEl.getBoundingClientRect();
-      const arenaRect=$('arena').getBoundingClientRect();
-      const fx_x=defRect.left-arenaRect.left+defRect.width/2;
-      const fx_y=defRect.top-arenaRect.top;
-      spawnFx(fx_x,fx_y,'hit',null,isMil?'#ff6b35':'#a78bfa');
-      if(Math.random()>0.5) spawnFx(fx_x+30,fx_y+30,'crack',null,isMil?'#ff9a3c':'#c4b5fd');
-      if(attacker===lastAttacker){combo++;if(combo>=2)spawnFx(0,0,'combo',combo+'连击！',isMil?'#ff6b35':'#a78bfa');}
-      else{combo=0;}
-      lastAttacker=attacker;
-      addLog((isMil?'婆婆':'媳妇')+'出击 -'+dmg+' ('+text.slice(0,12)+'...)');
-      round++;
-      $('round-badge').textContent='第 '+round+' 回合';
+      const dr=defEl.getBoundingClientRect(),ar=$('arena').getBoundingClientRect();
+      const fx=dr.left-ar.left+dr.width/2,fy=dr.top-ar.top;
+      spawnFx(fx,fy,'hit',null,isMil?'#ff6b35':'#a78bfa');
+      if(Math.random()>0.5)spawnFx(fx+28,fy+28,'crack',null,isMil?'#ff9a3c':'#c4b5fd');
+      if(attacker===lastAtk){combo++;if(combo>=2)spawnFx(0,0,'combo',combo+'连击！',isMil?'#ff6b35':'#a78bfa');}
+      else combo=0;
+      lastAtk=attacker;
+      const nm=isMil?($('mil-name').value||'婆婆'):($('dil-name').value||'媳妇');
+      addLog(nm+' -'+dmg+'HP');
+      round++;$('round-badge').textContent='第 '+round+' 回合';
     },180);
     setTimeout(()=>{
-      atkEl.classList.remove('attack-right','attack-left');
-      defEl.classList.remove('hit');
-      busy=false;
-      checkEnd();
+      atkEl.classList.remove('atk-r','atk-l');
+      defEl.classList.remove('hit-flash');
+      busy=false;checkEnd();
     },400);
   }
 
@@ -262,29 +423,32 @@
     const el=$(who+'-face');
     el.classList.add('shake');
     setTimeout(()=>el.classList.remove('shake'),400);
-    spawnFx(who==='mil'?60:240,100,'hit',null,who==='mil'?'#ff6b35':'#a78bfa');
+    const r=el.getBoundingClientRect(),ar=$('arena').getBoundingClientRect();
+    spawnFx(r.left-ar.left+r.width/2,r.top-ar.top,'hit',null,who==='mil'?'#ff6b35':'#a78bfa');
   }
 
   function checkEnd(){
-    if(dilHp<=0||milHp<=0){
-      const milWon=dilHp<=0;
-      $('result-title').textContent=milWon?'婆婆胜！👵':'媳妇赢了！👩';
-      $('result-title').style.color=milWon?'#ff6b35':'#a78bfa';
-      const endings=milWon?['媳妇耐心耗尽，选择以后少回婆家','媳妇决定修炼"左耳进右耳出"神功','媳妇默默掏出手机挂咸鱼...']:
-              ['婆婆败下阵来，三天内不敢发声','婆婆转移战场，去找邻居诉苦了','婆婆打电话给儿子：你媳妇欺负我！'];
-      $('result-msg').textContent=endings[Math.floor(Math.random()*endings.length)];
-      $('result').style.display='flex';
-    }
+    if(dilHp>0&&milHp>0)return;
+    const milWon=dilHp<=0;
+    const milName=$('mil-name').value||'婆婆';
+    const dilName=$('dil-name').value||'媳妇';
+    $('result-title').textContent=(milWon?milName:dilName)+'赢了！';
+    $('result-title').style.color=milWon?'#ff6b35':'#a78bfa';
+    const ends=milWon?[dilName+'耐心耗尽，决定以后少回婆家',dilName+'默默掏出手机挂闲鱼...',dilName+'修炼"左耳进右耳出"神功']:
+            [milName+'败下阵来，三天不敢发声',milName+'转移战场，去找邻居诉苦了',milName+'打电话给儿子：你媳妇欺负我！'];
+    $('result-msg').textContent=ends[Math.floor(Math.random()*ends.length)];
+    $('result').style.display='flex';
   }
 
   function restart(){
-    milHp=100;dilHp=100;round=1;busy=false;combo=0;lastAttacker='';
+    milHp=100;dilHp=100;round=1;busy=false;combo=0;lastAtk='';
     updateHp();
     $('round-badge').textContent='第 1 回合';
     $('result').style.display='none';
     $('log-area').innerHTML='';
-    showBubble('新的一局开始了，谁先动手？','mil','⚔️');
+    showBubble('新的一局！谁先动手？','mil','⚔️');
   }
 
-  updateHp();
+  buildEmojiPicker('mil');
+  buildEmojiPicker('dil');
 </script>
